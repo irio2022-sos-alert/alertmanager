@@ -1,0 +1,11 @@
+syntax = "proto3";
+import "google/protobuf/empty.proto";
+
+message ReceiptConfirmation {
+    int64 notifcationId = 1 ;
+}
+
+service AlertConfirmer {
+    rpc confirmAlertReceipt (ReceiptConfirmation) returns (google.protobuf.Empty) {} 
+}
+
