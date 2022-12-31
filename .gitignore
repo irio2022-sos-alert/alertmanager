@@ -130,3 +130,6 @@ dmypy.json
 
 # virtual env
 venv
+
+# ide
+.vscode
