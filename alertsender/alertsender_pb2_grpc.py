@@ -15,9 +15,9 @@ class AlertSenderStub(object):
         Args:
             channel: A grpc.Channel.
         """
-        self.sendNotification = channel.unary_unary(
-                '/AlertSender/sendNotification',
-                request_serializer=alertsender__pb2.NotifcationRequest.SerializeToString,
+        self.SendNotification = channel.unary_unary(
+                '/AlertSender/SendNotification',
+                request_serializer=alertsender__pb2.NotificationRequest.SerializeToString,
                 response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
                 )
 
@@ -25,7 +25,7 @@ class AlertSenderStub(object):
 class AlertSenderServicer(object):
     """Missing associated documentation comment in .proto file."""
 
-    def sendNotification(self, request, context):
+    def SendNotification(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -34,9 +34,9 @@ class AlertSenderServicer(object):
 
 def add_AlertSenderServicer_to_server(servicer, server):
     rpc_method_handlers = {
-            'sendNotification': grpc.unary_unary_rpc_method_handler(
-                    servicer.sendNotification,
-                    request_deserializer=alertsender__pb2.NotifcationRequest.FromString,
+            'SendNotification': grpc.unary_unary_rpc_method_handler(
+                    servicer.SendNotification,
+                    request_deserializer=alertsender__pb2.NotificationRequest.FromString,
                     response_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
             ),
     }
@@ -50,7 +50,7 @@ class AlertSender(object):
     """Missing associated documentation comment in .proto file."""
 
     @staticmethod
-    def sendNotification(request,
+    def SendNotification(request,
             target,
             options=(),
             channel_credentials=None,
@@ -60,8 +60,8 @@ class AlertSender(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/AlertSender/sendNotification',
-            alertsender__pb2.NotifcationRequest.SerializeToString,
+        return grpc.experimental.unary_unary(request, target, '/AlertSender/SendNotification',
+            alertsender__pb2.NotificationRequest.SerializeToString,
             google_dot_protobuf_dot_empty__pb2.Empty.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

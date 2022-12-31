@@ -14,17 +14,15 @@ _sym_db = _symbol_database.Default()
 from google.protobuf import empty_pb2 as google_dot_protobuf_dot_empty__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x11\x61lertsender.proto\x1a\x1bgoogle/protobuf/empty.proto\"E\n\x12NotifcationRequest\x12/\n\remailRequests\x18\x01 \x03(\x0b\x32\x18.EmailNotifactionRequest\"N\n\x17\x45mailNotifactionRequest\x12\x11\n\taddressee\x18\x01 \x01(\t\x12\x0f\n\x07subject\x18\x02 \x01(\t\x12\x0f\n\x07\x63ontent\x18\x03 \x01(\t2P\n\x0b\x41lertSender\x12\x41\n\x10sendNotification\x12\x13.NotifcationRequest\x1a\x16.google.protobuf.Empty\"\x00\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x11\x61lertsender.proto\x1a\x1bgoogle/protobuf/empty.proto\"N\n\x13NotificationRequest\x12\x15\n\remail_address\x18\x01 \x01(\t\x12\x0f\n\x07subject\x18\x02 \x01(\t\x12\x0f\n\x07\x63ontent\x18\x03 \x01(\t2Q\n\x0b\x41lertSender\x12\x42\n\x10SendNotification\x12\x14.NotificationRequest\x1a\x16.google.protobuf.Empty\"\x00\x62\x06proto3')
 
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, globals())
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'alertsender_pb2', globals())
 if _descriptor._USE_C_DESCRIPTORS == False:
 
   DESCRIPTOR._options = None
-  _NOTIFCATIONREQUEST._serialized_start=50
-  _NOTIFCATIONREQUEST._serialized_end=119
-  _EMAILNOTIFACTIONREQUEST._serialized_start=121
-  _EMAILNOTIFACTIONREQUEST._serialized_end=199
-  _ALERTSENDER._serialized_start=201
-  _ALERTSENDER._serialized_end=281
+  _NOTIFICATIONREQUEST._serialized_start=50
+  _NOTIFICATIONREQUEST._serialized_end=128
+  _ALERTSENDER._serialized_start=130
+  _ALERTSENDER._serialized_end=211
 # @@protoc_insertion_point(module_scope)
