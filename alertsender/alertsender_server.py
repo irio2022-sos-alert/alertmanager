@@ -17,10 +17,7 @@ def make_status_message(okay: bool, msg: str = "") -> alertsender_pb2.Status:
 class AlertSenderServicer(alertsender_pb2_grpc.AlertSenderServicer):
     """Provides methods that implement functionality of alert sender server."""
 
-    def __init__(self) -> None:
-        load_dotenv()
-        api_key = os.environ.get("SENDGRID_API_KEY")
-        sender_email = os.environ.get("SENDER_EMAIL")
+    def __init__(self, api_key: str, sender_email: str) -> None:
         self.sendgrid = SendGridAPIClient(api_key)
         self.sender_email = sender_email
 
@@ -48,10 +45,10 @@ class AlertSenderServicer(alertsender_pb2_grpc.AlertSenderServicer):
         return status
 
 
-def serve() -> None:
+def serve(api_key: str, sender_email: str) -> None:
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     alertsender_pb2_grpc.add_AlertSenderServicer_to_server(
-        AlertSenderServicer(), server
+        AlertSenderServicer(api_key, sender_email), server
     )
 
     server.add_insecure_port("[::]:50051")
@@ -60,5 +57,9 @@ def serve() -> None:
 
 
 if __name__ == "__main__":
+    load_dotenv()
+    api_key = os.environ.get("SENDGRID_API_KEY")
+    sender_email = os.environ.get("SENDER_EMAIL")
+
     logging.basicConfig(level=logging.INFO)
-    serve()
+    serve(api_key, sender_email)
