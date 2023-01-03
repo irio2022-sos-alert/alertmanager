@@ -39,6 +39,11 @@ repos:
     rev: c6ecb9fc51571a77bc92e6c265c358aef7cb6c38 # frozen: v2.2.1
     hooks:
       - id: codespell
+  - repo: https://github.com/pycqa/isort
+    rev: 5.11.2
+    hooks:
+      - id: isort
+        name: isort (python)
   # Formatters should be run late so that they can re-format any prior changes.
   - repo: https://github.com/psf/black
     rev: f6c139c5215ce04fd3e73a900f1372942d58eca0 # frozen: 22.6.0
