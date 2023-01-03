@@ -1,5 +1,4 @@
 syntax = "proto3";
-import "google/protobuf/empty.proto";
 
 message NotificationRequest {
   string email_address = 1;
@@ -7,6 +6,11 @@ message NotificationRequest {
   string content = 3;
 }
 
+message RequestStatus {
+  bool okay = 1;
+  string message = 2;
+}
+
 service AlertSender {
-  rpc SendNotification(NotificationRequest) returns (google.protobuf.Empty) {}
+  rpc SendNotification(NotificationRequest) returns (RequestStatus) {}
 }

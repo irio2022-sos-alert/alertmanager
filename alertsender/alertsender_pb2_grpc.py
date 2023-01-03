@@ -3,7 +3,6 @@
 import grpc
 
 import alertsender_pb2 as alertsender__pb2
-from google.protobuf import empty_pb2 as google_dot_protobuf_dot_empty__pb2
 
 
 class AlertSenderStub(object):
@@ -16,10 +15,10 @@ class AlertSenderStub(object):
             channel: A grpc.Channel.
         """
         self.SendNotification = channel.unary_unary(
-                '/AlertSender/SendNotification',
-                request_serializer=alertsender__pb2.NotificationRequest.SerializeToString,
-                response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
-                )
+            "/AlertSender/SendNotification",
+            request_serializer=alertsender__pb2.NotificationRequest.SerializeToString,
+            response_deserializer=alertsender__pb2.RequestStatus.FromString,
+        )
 
 
 class AlertSenderServicer(object):
@@ -28,40 +27,53 @@ class AlertSenderServicer(object):
     def SendNotification(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
 
 
 def add_AlertSenderServicer_to_server(servicer, server):
     rpc_method_handlers = {
-            'SendNotification': grpc.unary_unary_rpc_method_handler(
-                    servicer.SendNotification,
-                    request_deserializer=alertsender__pb2.NotificationRequest.FromString,
-                    response_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
-            ),
+        "SendNotification": grpc.unary_unary_rpc_method_handler(
+            servicer.SendNotification,
+            request_deserializer=alertsender__pb2.NotificationRequest.FromString,
+            response_serializer=alertsender__pb2.RequestStatus.SerializeToString,
+        ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
-            'AlertSender', rpc_method_handlers)
+        "AlertSender", rpc_method_handlers
+    )
     server.add_generic_rpc_handlers((generic_handler,))
 
 
- # This class is part of an EXPERIMENTAL API.
+# This class is part of an EXPERIMENTAL API.
 class AlertSender(object):
     """Missing associated documentation comment in .proto file."""
 
     @staticmethod
-    def SendNotification(request,
+    def SendNotification(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
             target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/AlertSender/SendNotification',
+            "/AlertSender/SendNotification",
             alertsender__pb2.NotificationRequest.SerializeToString,
-            google_dot_protobuf_dot_empty__pb2.Empty.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+            alertsender__pb2.RequestStatus.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )

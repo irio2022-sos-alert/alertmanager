@@ -1,4 +1,3 @@
-from google.protobuf import empty_pb2 as _empty_pb2
 from google.protobuf import descriptor as _descriptor
 from google.protobuf import message as _message
 from typing import ClassVar as _ClassVar, Optional as _Optional
@@ -13,4 +12,17 @@ class NotificationRequest(_message.Message):
     content: str
     email_address: str
     subject: str
-    def __init__(self, email_address: _Optional[str] = ..., subject: _Optional[str] = ..., content: _Optional[str] = ...) -> None: ...
+    def __init__(
+        self,
+        email_address: _Optional[str] = ...,
+        subject: _Optional[str] = ...,
+        content: _Optional[str] = ...,
+    ) -> None: ...
+
+class RequestStatus(_message.Message):
+    __slots__ = ["message", "okay"]
+    MESSAGE_FIELD_NUMBER: _ClassVar[int]
+    OKAY_FIELD_NUMBER: _ClassVar[int]
+    message: str
+    okay: bool
+    def __init__(self, okay: bool = ..., message: _Optional[str] = ...) -> None: ...
