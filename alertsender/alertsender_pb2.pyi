@@ -12,14 +12,9 @@ class NotificationRequest(_message.Message):
     content: str
     email_address: str
     subject: str
-    def __init__(
-        self,
-        email_address: _Optional[str] = ...,
-        subject: _Optional[str] = ...,
-        content: _Optional[str] = ...,
-    ) -> None: ...
+    def __init__(self, email_address: _Optional[str] = ..., subject: _Optional[str] = ..., content: _Optional[str] = ...) -> None: ...
 
-class RequestStatus(_message.Message):
+class Status(_message.Message):
     __slots__ = ["message", "okay"]
     MESSAGE_FIELD_NUMBER: _ClassVar[int]
     OKAY_FIELD_NUMBER: _ClassVar[int]

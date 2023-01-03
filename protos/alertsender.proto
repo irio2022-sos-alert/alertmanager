@@ -6,11 +6,11 @@ message NotificationRequest {
   string content = 3;
 }
 
-message RequestStatus {
+message Status {
   bool okay = 1;
   string message = 2;
 }
 
 service AlertSender {
-  rpc SendNotification(NotificationRequest) returns (RequestStatus) {}
+  rpc SendNotification(NotificationRequest) returns (Status) {}
 }
