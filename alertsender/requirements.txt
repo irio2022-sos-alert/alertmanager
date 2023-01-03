@@ -1,0 +1,5 @@
+grpc==1.0.0
+grpcio==1.51.1
+protobuf==4.21.12
+python-dotenv==0.21.0
+sendgrid==6.9.7
