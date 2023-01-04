@@ -3,7 +3,6 @@
 import grpc
 
 import alertmanager_pb2 as alertmanager__pb2
-from google.protobuf import empty_pb2 as google_dot_protobuf_dot_empty__pb2
 
 
 class AlertManagerStub(object):
@@ -15,28 +14,28 @@ class AlertManagerStub(object):
         Args:
             channel: A grpc.Channel.
         """
-        self.handleAlert = channel.unary_unary(
-                '/AlertManager/handleAlert',
+        self.Alert = channel.unary_unary(
+                '/AlertManager/Alert',
                 request_serializer=alertmanager__pb2.AlertRequest.SerializeToString,
-                response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+                response_deserializer=alertmanager__pb2.Status.FromString,
                 )
-        self.handleConfimation = channel.unary_unary(
-                '/AlertManager/handleConfimation',
+        self.handleReceiptConfirmation = channel.unary_unary(
+                '/AlertManager/handleReceiptConfirmation',
                 request_serializer=alertmanager__pb2.ReceiptConfirmation.SerializeToString,
-                response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+                response_deserializer=alertmanager__pb2.Status.FromString,
                 )
 
 
 class AlertManagerServicer(object):
     """Missing associated documentation comment in .proto file."""
 
-    def handleAlert(self, request, context):
+    def Alert(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def handleConfimation(self, request, context):
+    def handleReceiptConfirmation(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -45,15 +44,15 @@ class AlertManagerServicer(object):
 
 def add_AlertManagerServicer_to_server(servicer, server):
     rpc_method_handlers = {
-            'handleAlert': grpc.unary_unary_rpc_method_handler(
-                    servicer.handleAlert,
+            'Alert': grpc.unary_unary_rpc_method_handler(
+                    servicer.Alert,
                     request_deserializer=alertmanager__pb2.AlertRequest.FromString,
-                    response_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
+                    response_serializer=alertmanager__pb2.Status.SerializeToString,
             ),
-            'handleConfimation': grpc.unary_unary_rpc_method_handler(
-                    servicer.handleConfimation,
+            'handleReceiptConfirmation': grpc.unary_unary_rpc_method_handler(
+                    servicer.handleReceiptConfirmation,
                     request_deserializer=alertmanager__pb2.ReceiptConfirmation.FromString,
-                    response_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
+                    response_serializer=alertmanager__pb2.Status.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -66,7 +65,7 @@ class AlertManager(object):
     """Missing associated documentation comment in .proto file."""
 
     @staticmethod
-    def handleAlert(request,
+    def Alert(request,
             target,
             options=(),
             channel_credentials=None,
@@ -76,14 +75,14 @@ class AlertManager(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/AlertManager/handleAlert',
+        return grpc.experimental.unary_unary(request, target, '/AlertManager/Alert',
             alertmanager__pb2.AlertRequest.SerializeToString,
-            google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+            alertmanager__pb2.Status.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
     @staticmethod
-    def handleConfimation(request,
+    def handleReceiptConfirmation(request,
             target,
             options=(),
             channel_credentials=None,
@@ -93,8 +92,8 @@ class AlertManager(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/AlertManager/handleConfimation',
+        return grpc.experimental.unary_unary(request, target, '/AlertManager/handleReceiptConfirmation',
             alertmanager__pb2.ReceiptConfirmation.SerializeToString,
-            google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+            alertmanager__pb2.Status.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

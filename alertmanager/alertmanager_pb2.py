@@ -11,20 +11,21 @@ from google.protobuf import symbol_database as _symbol_database
 _sym_db = _symbol_database.Default()
 
 
-from google.protobuf import empty_pb2 as google_dot_protobuf_dot_empty__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x12\x61lertmanager.proto\x1a\x1bgoogle/protobuf/empty.proto\"!\n\x0c\x41lertRequest\x12\x11\n\tserviceId\x18\x01 \x01(\x03\"(\n\x13ReceiptConfirmation\x12\x11\n\tserviceId\x18\x01 \x01(\x03\x32\x8b\x01\n\x0c\x41lertManager\x12\x36\n\x0bhandleAlert\x12\r.AlertRequest\x1a\x16.google.protobuf.Empty\"\x00\x12\x43\n\x11handleConfimation\x12\x14.ReceiptConfirmation\x1a\x16.google.protobuf.Empty\"\x00\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x12\x61lertmanager.proto\"!\n\x0c\x41lertRequest\x12\x11\n\tserviceId\x18\x01 \x01(\x03\"(\n\x13ReceiptConfirmation\x12\x11\n\tserviceId\x18\x01 \x01(\x03\"\'\n\x06Status\x12\x0c\n\x04okay\x18\x01 \x01(\x08\x12\x0f\n\x07message\x18\x02 \x01(\t2o\n\x0c\x41lertManager\x12!\n\x05\x41lert\x12\r.AlertRequest\x1a\x07.Status\"\x00\x12<\n\x19handleReceiptConfirmation\x12\x14.ReceiptConfirmation\x1a\x07.Status\"\x00\x62\x06proto3')
 
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, globals())
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'alertmanager_pb2', globals())
 if _descriptor._USE_C_DESCRIPTORS == False:
 
   DESCRIPTOR._options = None
-  _ALERTREQUEST._serialized_start=51
-  _ALERTREQUEST._serialized_end=84
-  _RECEIPTCONFIRMATION._serialized_start=86
-  _RECEIPTCONFIRMATION._serialized_end=126
-  _ALERTMANAGER._serialized_start=129
-  _ALERTMANAGER._serialized_end=268
+  _ALERTREQUEST._serialized_start=22
+  _ALERTREQUEST._serialized_end=55
+  _RECEIPTCONFIRMATION._serialized_start=57
+  _RECEIPTCONFIRMATION._serialized_end=97
+  _STATUS._serialized_start=99
+  _STATUS._serialized_end=138
+  _ALERTMANAGER._serialized_start=140
+  _ALERTMANAGER._serialized_end=251
 # @@protoc_insertion_point(module_scope)
