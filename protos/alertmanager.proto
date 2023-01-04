@@ -1,5 +1,4 @@
 syntax = "proto3";
-import "google/protobuf/empty.proto";
 
 message AlertRequest {
   int64 serviceId = 1;
@@ -9,7 +8,12 @@ message ReceiptConfirmation {
   int64 serviceId = 1;
 }
 
+message Status {
+  bool okay = 1;
+  string message = 2;
+}
+
 service AlertManager {
-  rpc handleAlert(AlertRequest) returns (google.protobuf.Empty) {}
-  rpc handleConfimation(ReceiptConfirmation) returns (google.protobuf.Empty) {}
+  rpc Alert(AlertRequest) returns (Status) {}
+  rpc handleReceiptConfirmation(ReceiptConfirmation) returns (Status) {}
 }
