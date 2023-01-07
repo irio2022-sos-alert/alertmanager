@@ -16,7 +16,7 @@ DB_NAME = "project"
 
 db_url = f"postgresql://{POSTGRES_USER}:{POSTGRES_PWD}@{POSTGRES_HOST}/{DB_NAME}"
 
-engine = create_engine(db_url, echo=True)
+engine = create_engine(db_url)
 
 
 def create_db_and_tables():

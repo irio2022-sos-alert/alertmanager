@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+package alert;
+
+// alertmanager service definition
+service AlertManager {
+  rpc Alert(AlertRequest) returns (Status) {}
+  rpc handleReceiptConfirmation(ReceiptConfirmation) returns (Status) {}
+}
+
+// alertsender service definition
+service AlertSender {
+  rpc SendNotification(NotificationRequest) returns (Status) {}
+}
+
+// alertconfirmer service definition
+service AlertConfirmer {
+  rpc confirmAlertReceipt(ReceiptConfirmation) returns (Status) {}
+}
+
+message AlertRequest {
+  int64 serviceId = 1;
+}
+
+message ReceiptConfirmation {
+  int64 serviceId = 1;
+}
+
+message Status {
+  bool okay = 1;
+  string message = 2;
+}
+
+message NotificationRequest {
+    string email_address = 1;
+    string subject = 2;
+    string content = 3;
+  }

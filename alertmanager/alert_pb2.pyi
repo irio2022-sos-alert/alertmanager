@@ -4,6 +4,12 @@ from typing import ClassVar as _ClassVar, Optional as _Optional
 
 DESCRIPTOR: _descriptor.FileDescriptor
 
+class AlertRequest(_message.Message):
+    __slots__ = ["serviceId"]
+    SERVICEID_FIELD_NUMBER: _ClassVar[int]
+    serviceId: int
+    def __init__(self, serviceId: _Optional[int] = ...) -> None: ...
+
 class NotificationRequest(_message.Message):
     __slots__ = ["content", "email_address", "subject"]
     CONTENT_FIELD_NUMBER: _ClassVar[int]
@@ -13,6 +19,12 @@ class NotificationRequest(_message.Message):
     email_address: str
     subject: str
     def __init__(self, email_address: _Optional[str] = ..., subject: _Optional[str] = ..., content: _Optional[str] = ...) -> None: ...
+
+class ReceiptConfirmation(_message.Message):
+    __slots__ = ["serviceId"]
+    SERVICEID_FIELD_NUMBER: _ClassVar[int]
+    serviceId: int
+    def __init__(self, serviceId: _Optional[int] = ...) -> None: ...
 
 class Status(_message.Message):
     __slots__ = ["message", "okay"]

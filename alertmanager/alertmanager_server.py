@@ -3,24 +3,21 @@ import os
 from concurrent import futures
 from datetime import datetime
 
-import alertmanager_pb2
-import alertmanager_pb2_grpc
+import alert_pb2
+import alert_pb2_grpc
 import grpc
 from db import create_db_and_tables, engine
 from dotenv import load_dotenv
 from models import Admins, Alerts, Ownership, Services
 from sqlmodel import Session
 
-import alertsender.alertsender_pb2 as alertsender_pb2
-import alertsender.alertsender_pb2_grpc as alertsender_pb2_grpc
 
-
-def make_status_message(okay: bool, msg: str = "") -> alertmanager_pb2.Status:
-    return alertmanager_pb2.Status(okay=okay, message=msg)
+def make_status_message(okay: bool, msg: str = "") -> alert_pb2.Status:
+    return alert_pb2.Status(okay=okay, message=msg)
 
 
 def make_alert_notification(email, service_name):
-    return alertsender_pb2.NotificationRequest(
+    return alert_pb2.NotificationRequest(
         email_address=email,
         subject=f"Your {service_name} service is down!",
         content=f"""As of {datetime.utcnow()} (UTC) your {service_name} service
@@ -57,7 +54,7 @@ def get_service(service_id: int) -> Services:
         return session.query(Services).get(service_id)
 
 
-class AlertManagerServicer(alertmanager_pb2_grpc.AlertManagerServicer):
+class AlertManagerServicer(alert_pb2_grpc.AlertManagerServicer):
     """Provides methods that implement functionality of alert manager server."""
 
     def __init__(self, alertsender_endpoint) -> None:
@@ -79,8 +76,8 @@ class AlertManagerServicer(alertmanager_pb2_grpc.AlertManagerServicer):
         return
 
     def Alert(
-        self, request: alertmanager_pb2.AlertRequest, unused_context
-    ) -> alertmanager_pb2.Status:
+        self, request: alert_pb2.AlertRequest, unused_context
+    ) -> alert_pb2.Status:
         service = get_service(request.serviceId)
 
         if service is None:
@@ -94,7 +91,7 @@ class AlertManagerServicer(alertmanager_pb2_grpc.AlertManagerServicer):
         alerting_routine_status = make_status_message(okay=True)
 
         with grpc.insecure_channel(self.alertsender_endpoint) as channel:
-            stub = alertsender_pb2_grpc.AlertSenderStub(channel)
+            stub = alert_pb2_grpc.AlertSenderStub(channel)
             for email in emails:
                 notification = make_alert_notification(email, service.name)
                 call_status = stub.SendNotification(notification)
@@ -107,7 +104,7 @@ class AlertManagerServicer(alertmanager_pb2_grpc.AlertManagerServicer):
         return alerting_routine_status
 
     def handleReceiptConfirmation(
-        self, request: alertmanager_pb2.ReceiptConfirmation, unused_context
+        self, request: alert_pb2.ReceiptConfirmation, unused_context
     ):
         with Session(engine) as session:
             status = make_status_message(okay="True")
@@ -128,10 +125,10 @@ class AlertManagerServicer(alertmanager_pb2_grpc.AlertManagerServicer):
             return status
 
 
-def serve() -> None:
+def serve(alertsender_endpoint: str) -> None:
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
-    alertmanager_pb2_grpc.add_AlertManagerServicer_to_server(
-        AlertManagerServicer(), server
+    alert_pb2_grpc.add_AlertManagerServicer_to_server(
+        AlertManagerServicer(alertsender_endpoint), server
     )
 
     server.add_insecure_port("[::]:50052")
@@ -141,5 +138,6 @@ def serve() -> None:
 
 if __name__ == "__main__":
     load_dotenv()
+    alertsender_endpoint = "[::]:50051"
     logging.basicConfig(level=logging.INFO)
-    serve()
+    serve(alertsender_endpoint)
