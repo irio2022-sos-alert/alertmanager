@@ -18,3 +18,8 @@ class Ownership(SQLModel, table=True):
     service_id: int = Field(foreign_key="services.id", primary_key=True)
     admin_id: int = Field(foreign_key="admins.id", primary_key=True)
     first_contact: bool
+
+
+class Alerts(SQLModel, table=True):
+    __tablename__ = "alerts"
+    service_id: int = Field(foreign_key="services.id", primary_key=True)
