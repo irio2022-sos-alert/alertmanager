@@ -1,5 +1,4 @@
 import logging
-import os
 from concurrent import futures
 from datetime import datetime
 
@@ -60,20 +59,6 @@ class AlertManagerServicer(alert_pb2_grpc.AlertManagerServicer):
     def __init__(self, alertsender_endpoint) -> None:
         self.alertsender_endpoint = alertsender_endpoint
         create_db_and_tables()
-
-    def get_first_contact_email(self, service_id):
-        # should call db to get it
-        return os.environ.get("SENDER_EMAIL")
-
-    def get_service_name(self, service_id):
-        # should call db to get it
-        return "usos.uw.edu.pl"
-
-    def alert_routine_exists(self, service_id):
-        return True
-
-    def stop_alert_routine(self, service_id):
-        return
 
     def Alert(
         self, request: alert_pb2.AlertRequest, unused_context
