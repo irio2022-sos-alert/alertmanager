@@ -92,7 +92,7 @@ class AlertManagerServicer(alert_pb2_grpc.AlertManagerServicer):
         self, request: alert_pb2.ReceiptConfirmation, unused_context
     ):
         with Session(engine) as session:
-            status = make_status_message(okay="True")
+            status = make_status_message(okay=True)
             service = session.query(Services).get(request.serviceId)
             if service is None:
                 status = make_status_message(okay=False, msg="No such service!")
@@ -101,12 +101,14 @@ class AlertManagerServicer(alert_pb2_grpc.AlertManagerServicer):
 
                 if alert is None:
                     status = make_status_message(
-                        okay=False, msg="No ongoing alerting routine for this service!"
+                        okay=False,
+                        msg="No ongoing alerting routine for this service!",
                     )
                 else:
                     alert.delete()
                     session.commit()
 
+            print(status)
             return status
 
 
