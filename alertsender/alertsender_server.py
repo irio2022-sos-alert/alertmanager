@@ -5,7 +5,6 @@ from concurrent import futures
 import alert_pb2
 import alert_pb2_grpc
 import grpc
-from dotenv import load_dotenv
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
 
@@ -45,21 +44,22 @@ class AlertSenderServicer(alert_pb2_grpc.AlertSenderServicer):
         return status
 
 
-def serve(api_key: str, sender_email: str) -> None:
+def serve(port: str, api_key: str, sender_email: str) -> None:
+    bind_address = f"[::]:{port}"
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     alert_pb2_grpc.add_AlertSenderServicer_to_server(
         AlertSenderServicer(api_key, sender_email), server
     )
-
-    server.add_insecure_port("[::]:50051")
+    server.add_insecure_port(bind_address)
     server.start()
+    logging.info("Listening on %s.", bind_address)
     server.wait_for_termination()
 
 
 if __name__ == "__main__":
-    load_dotenv()
+    port = os.environ.get("PORT", "50051")
     api_key = os.environ.get("SENDGRID_API_KEY")
     sender_email = os.environ.get("SENDER_EMAIL")
 
     logging.basicConfig(level=logging.INFO)
-    serve(api_key, sender_email)
+    serve(port, api_key, sender_email)
