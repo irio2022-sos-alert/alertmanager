@@ -5,6 +5,7 @@ from concurrent import futures
 import alert_pb2
 import alert_pb2_grpc
 import grpc
+from python_http_client.exceptions import HTTPError
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
 
@@ -32,14 +33,23 @@ class AlertSenderServicer(alert_pb2_grpc.AlertSenderServicer):
         self, request: alert_pb2.NotificationRequest, context
     ) -> alert_pb2.Status:
         email = self.compose_email(request)
-        sg_response = self.sendgrid.send(email)
         status = make_status_message(okay=True)
 
-        if sg_response.status_code != 202:
-            status = make_status_message(
-                okay=False,
-                msg=f"Sendgrid api call returned with code: {sg_response.status_code}",
-            )
+        try:
+            sg_response = self.sendgrid.send(email)
+            if sg_response.status_code != 202:
+                status = make_status_message(
+                    okay=False,
+                    msg=f"Sendgrid api call returned with code: {sg_response.status_code}",
+                )
+        except HTTPError as e:
+            status = make_status_message(False, f"{e}")
+            print(e.to_dict)
+
+        if status.okay:
+            logging.info(f"Successfully sent email to {request.email_address}")
+        else:
+            logging.info(f"Sending email to {request.email_address} failed!")
 
         return status
 
