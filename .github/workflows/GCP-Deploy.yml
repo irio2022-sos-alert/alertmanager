@@ -10,7 +10,6 @@ jobs:
   deploy:
     name: Setup Gcloud Account
     runs-on: ubuntu-latest
-    shell: bash
     env:
       SENDER_IMAGE_NAME: gcr.io/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.GCP_ALERTSENDER_APP_NAME }}:latest
       MANAGER_IMAGE_NAME: gcr.io/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.GCP_MANAGER_APP_NAME }}:latest
