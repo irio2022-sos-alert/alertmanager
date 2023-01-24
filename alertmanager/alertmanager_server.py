@@ -1,4 +1,5 @@
 import logging
+import os
 from concurrent import futures
 from datetime import datetime
 
@@ -6,7 +7,6 @@ import alert_pb2
 import alert_pb2_grpc
 import grpc
 from db import create_db_and_tables, engine
-from dotenv import load_dotenv
 from models import Admins, Alerts, Ownership, Services
 from sqlmodel import Session
 
@@ -112,19 +112,20 @@ class AlertManagerServicer(alert_pb2_grpc.AlertManagerServicer):
             return status
 
 
-def serve(alertsender_endpoint: str) -> None:
+def serve(port: str, alertsender_endpoint: str) -> None:
+    bind_address = f"[::]:{port}"
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     alert_pb2_grpc.add_AlertManagerServicer_to_server(
         AlertManagerServicer(alertsender_endpoint), server
     )
 
-    server.add_insecure_port("[::]:50052")
+    server.add_insecure_port(bind_address)
     server.start()
     server.wait_for_termination()
 
 
 if __name__ == "__main__":
-    load_dotenv()
-    alertsender_endpoint = "[::]:50051"
+    port = os.environ.get("PORT", "50052")
+    alertsender_endpoint = os.environ.get("ALERTSENDER_ENDPOINT", "50051")
     logging.basicConfig(level=logging.INFO)
     serve(alertsender_endpoint)
