@@ -28,20 +28,26 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - id: sender-docker
-        name: Build sender docker
+      - name: Build sender docker
         run: ./scripts/build-docker.sh alertsender $SENDER_IMAGE_NAME
         shell: bash
 
-      # - name: Build manager docker
-      #   run: ./scripts/build-docker.sh alertsender $MANAGER_IMAGE_NAME
-      #   shell: bash
+      - name: Build manager docker
+        run: ./scripts/build-docker.sh alertmanager $MANAGER_IMAGE_NAME
+        shell: bash
+
+      - name: Build confirmer docker
+        run: ./scripts/build-docker.sh alertconfirmer $CONFIRMER_IMAGE_NAME
+        shell: bash
 
       - name: Deploy sender docker
         run: ./scripts/deploy.sh ${{ secrets.GCP_ALERTSENDER_APP_NAME }} $SENDER_IMAGE_NAME
         shell: bash
-        waitFor: [sender-docker]
 
-      # - name: Deploy manager docker
-      #   run: ./scripts/deploy.sh ${{ secrets.GCP_MANAGER_APP_NAME }} $MANAGER_IMAGE_NAME
-      #   shell: bash
+      - name: Deploy manager docker
+        run: ./scripts/deploy.sh ${{ secrets.GCP_MANAGER_APP_NAME }} $MANAGER_IMAGE_NAME
+        shell: bash
+
+      - name: Deploy confirmer docker
+        run: ./scripts/deploy.sh ${{ secrets.GCP_CONFIRMER_APP_NAME }} $CONFIRMER_IMAGE_NAME
+        shell: bash
