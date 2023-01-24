@@ -15,13 +15,20 @@ def make_status_message(okay: bool, msg: str = "") -> alert_pb2.Status:
     return alert_pb2.Status(okay=okay, message=msg)
 
 
-def make_alert_notification(email, service_name):
+def make_alert_notification(email, service_name, confirmation_link):
     return alert_pb2.NotificationRequest(
         email_address=email,
         subject=f"Your {service_name} service is down!",
         content=f"""As of {datetime.utcnow()} (UTC) your {service_name} service
-        was unresponsive for longer than set allowed time.""",
+        was unresponsive for longer than set allowed time.
+
+        Please confirm receipt of this notification:
+        {confirmation_link}""",
     )
+
+
+def make_confirmation_link(alertconfirmer_endpoint: str, service: Services):
+    return f"{alertconfirmer_endpoint}/{service.id}"
 
 
 def get_first_contact_emails(service_id: int) -> list[str]:
@@ -56,8 +63,9 @@ def get_service(service_id: int) -> Services:
 class AlertManagerServicer(alert_pb2_grpc.AlertManagerServicer):
     """Provides methods that implement functionality of alert manager server."""
 
-    def __init__(self, alertsender_endpoint) -> None:
+    def __init__(self, alertsender_endpoint: str, alertconfirmer_endpoint: str) -> None:
         self.alertsender_endpoint = alertsender_endpoint
+        self.alertconfirmer_endpoint = alertconfirmer_endpoint
         create_db_and_tables()
 
     def Alert(
@@ -74,11 +82,16 @@ class AlertManagerServicer(alert_pb2_grpc.AlertManagerServicer):
         emails = get_first_contact_emails(service.id)
 
         alerting_routine_status = make_status_message(okay=True)
+        confirmation_link = make_confirmation_link(
+            self.alertconfirmer_endpoint, service
+        )
 
         with grpc.insecure_channel(self.alertsender_endpoint) as channel:
             stub = alert_pb2_grpc.AlertSenderStub(channel)
             for email in emails:
-                notification = make_alert_notification(email, service.name)
+                notification = make_alert_notification(
+                    email, service, confirmation_link
+                )
                 call_status = stub.SendNotification(notification)
                 if call_status.okay is False:
                     alerting_routine_status = make_status_message(
@@ -112,11 +125,11 @@ class AlertManagerServicer(alert_pb2_grpc.AlertManagerServicer):
             return status
 
 
-def serve(port: str, alertsender_endpoint: str) -> None:
+def serve(port: str, alertsender_endpoint: str, alertconfirmer_endpoint: str) -> None:
     bind_address = f"[::]:{port}"
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     alert_pb2_grpc.add_AlertManagerServicer_to_server(
-        AlertManagerServicer(alertsender_endpoint), server
+        AlertManagerServicer(alertsender_endpoint, alertconfirmer_endpoint), server
     )
 
     server.add_insecure_port(bind_address)
@@ -128,5 +141,6 @@ def serve(port: str, alertsender_endpoint: str) -> None:
 if __name__ == "__main__":
     port = os.environ.get("PORT", "50052")
     alertsender_endpoint = os.environ.get("ALERTSENDER_ENDPOINT", "[::]:50051")
+    alertconfirmer_endpoint = os.environ.get("ALERTCONFIRMER_ENDPOINT", "[::]:50053")
     logging.basicConfig(level=logging.INFO)
-    serve(port, alertsender_endpoint)
+    serve(port, alertsender_endpoint, alertconfirmer_endpoint)
