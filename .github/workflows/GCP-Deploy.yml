@@ -33,5 +33,5 @@ jobs:
         shell: bash
 
       - name: Deploy sender docker
-        run: ./scripts/build-deploy.sh ${{ secrets.GCP_ALERTSENDER_APP_NAME }} $SENDER_IMAGE_NAME
+        run: ./scripts/deploy.sh ${{ secrets.GCP_ALERTSENDER_APP_NAME }} $SENDER_IMAGE_NAME
         shell: bash
