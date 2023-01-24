@@ -121,6 +121,7 @@ def serve(port: str, alertsender_endpoint: str) -> None:
 
     server.add_insecure_port(bind_address)
     server.start()
+    logging.info("Listening on %s.", bind_address)
     server.wait_for_termination()
 
 
@@ -128,4 +129,4 @@ if __name__ == "__main__":
     port = os.environ.get("PORT", "50052")
     alertsender_endpoint = os.environ.get("ALERTSENDER_ENDPOINT", "50051")
     logging.basicConfig(level=logging.INFO)
-    serve(alertsender_endpoint)
+    serve(port, alertsender_endpoint)
