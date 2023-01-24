@@ -28,11 +28,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Build Docker image
-        run: docker build alertsender -t $SENDER_IMAGE_NAME
-
-      - name: Push Docker image
-        run: docker push $SENDER_IMAGE_NAME
+      - name: Build alertsender docker
+        entrypoint: ./scripts/deploy.sh
+        args: ["alertsender", "$SENDER_IMAGE_NAME"]
 
       - name: Deploy Docker image
         run: gcloud run deploy ${{ secrets.GCP_ALERTSENDER_APP_NAME }} --image $SENDER_IMAGE_NAME --region europe-north1 --platform managed --allow-unauthenticated
