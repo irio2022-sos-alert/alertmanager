@@ -1,3 +1,5 @@
+import os
+
 import alert_pb2
 import alert_pb2_grpc
 import grpc
@@ -29,5 +31,5 @@ def confirm_receipt(service_id: int):
 
 
 if __name__ == "__main__":
-    alertmanager_endpoint = "[::]:50052"
+    alertmanager_endpoint = os.getenv("ALERTMANAGER_ENDPOINT", "[::]:50052")
     app.run()
