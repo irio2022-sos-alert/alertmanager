@@ -11,7 +11,7 @@ jobs:
     name: Setup Gcloud Account
     runs-on: ubuntu-latest
     env:
-      IMAGE_NAME: gcr.io/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.GCP_ALERTSENDER_APP_NAME }}
+      IMAGE_NAME: gcr.io/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.GCP_ALERTSENDER_APP_NAME }}:latest
     steps:
       - name: Login
         uses: google-github-actions/setup-gcloud@v0
@@ -33,4 +33,4 @@ jobs:
         run: docker push $IMAGE_NAME
 
       - name: Deploy Docker image
-        run: gcloud run deploy ${{ secrets.GCP_PROJECT_ID }} --image $IMAGE_NAME --region europe-north1 --platform managed
+        run: gcloud run deploy ${{ secrets.GCP_ALERTSENDER_APP_NAME }} --image $IMAGE_NAME --region europe-north1 --platform managed --allow-unauthenticated
