@@ -127,6 +127,6 @@ def serve(port: str, alertsender_endpoint: str) -> None:
 
 if __name__ == "__main__":
     port = os.environ.get("PORT", "50052")
-    alertsender_endpoint = os.environ.get("ALERTSENDER_ENDPOINT", "50051")
+    alertsender_endpoint = os.environ.get("ALERTSENDER_ENDPOINT", "[::]:50051")
     logging.basicConfig(level=logging.INFO)
     serve(port, alertsender_endpoint)

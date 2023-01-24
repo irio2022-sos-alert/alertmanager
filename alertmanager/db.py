@@ -12,7 +12,7 @@ POSTGRES_USER = os.getenv("POSTGRES_USER")
 POSTGRES_PWD = os.getenv("POSTGRES_PWD")
 POSTGRES_HOST = os.getenv("POSTGRES_HOST")
 POSTGRES_PORT = os.getenv("POSTGRES_PORT")
-DB_NAME = "project"
+DB_NAME = os.getenv("POSTGRES_PORT", "alerts")
 
 db_url = f"postgresql://{POSTGRES_USER}:{POSTGRES_PWD}@{POSTGRES_HOST}/{DB_NAME}"
 
