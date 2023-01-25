@@ -1,12 +1,9 @@
 import os
 
-from dotenv import load_dotenv
 from models import Alerts
 from sqlalchemy import create_engine
 from sqlalchemy_utils import create_database, database_exists
 from sqlmodel import Session, SQLModel
-
-load_dotenv()  # take environment variables from .env.
 
 POSTGRES_USER = os.getenv("POSTGRES_USER")
 POSTGRES_PWD = os.getenv("POSTGRES_PWD")
@@ -16,10 +13,7 @@ DB_NAME = os.getenv("DB_NAME", "alerts")
 
 db_url = f"postgresql://{POSTGRES_USER}:{POSTGRES_PWD}@{POSTGRES_HOST}/{DB_NAME}"
 
-try:
-    engine = create_engine(db_url)
-except:
-    print("Couldn't connect to db!")
+engine = create_engine(db_url)
 
 
 def create_db_and_tables():

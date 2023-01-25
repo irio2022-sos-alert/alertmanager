@@ -3,9 +3,6 @@ import logging
 import alert_pb2
 import alert_pb2_grpc
 import grpc
-from dotenv import load_dotenv
-
-load_dotenv()
 
 
 def create_receipt_confirmation(service_id: int) -> alert_pb2.ReceiptConfirmation:
