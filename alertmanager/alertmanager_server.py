@@ -53,6 +53,7 @@ def alert_exists(service_id: int) -> bool:
 def register_alert(service_id: int):
     with Session(engine) as session:
         session.add(Alerts(service_id=service_id))
+        session.commit()
 
 
 def get_service(service_id: int) -> Services:
@@ -75,11 +76,13 @@ class AlertManagerServicer(alert_pb2_grpc.AlertManagerServicer):
         if service is None:
             logging.info("No such service!")
             return make_status_message(okay=False, msg="No such service!")
+
         if alert_exists(request.serviceId):
             logging.info(f"Routine already exists for id: {request.serviceId}")
             return make_status_message(okay=True, msg="Alert is already being handled")
+        else:
+            register_alert(service.id)
 
-        register_alert(service.id)
         emails = get_first_contact_emails(service.id)
         logging.info(f"Received valid alert request for service_id: {service.id}")
         if len(emails) == 0:
