@@ -95,13 +95,11 @@ def clean_up_db(db: sqlalchemy.engine.base.Engine) -> None:
 
 
 if __name__ == "__main__":
-    from models import Alerts
+    from models import Ownership
 
     db = init_connection_pool()
     migrate_db(db)
 
     with Session(db) as session:
-        x = session.query(Alerts).all()
+        x = session.query(Ownership).all()
         print(x)
-
-    clean_up_db(db)

@@ -24,7 +24,7 @@ def test_send_confirmation(stub: alert_pb2_grpc.AlertManagerStub):
         print(response.message)
 
 
-def test_send_alert_request(stub: alert_pb2_grpc.AlertManagerStub):
+def test_send_alert_request(stub: alert_pb2_grpc.AlertManagerStub) -> None:
     request = create_alert_request(1)
     response = stub.Alert(request)
 
@@ -39,7 +39,7 @@ def run():
     logging.info(f"endpoint : {endpoint}")
     with grpc.insecure_channel(endpoint) as channel:
         stub = alert_pb2_grpc.AlertManagerStub(channel)
-        # test_send_confirmation(stub)
+        test_send_confirmation(stub)
         test_send_alert_request(stub)
 
 
