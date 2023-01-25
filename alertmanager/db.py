@@ -101,5 +101,14 @@ if __name__ == "__main__":
     migrate_db(db)
 
     with Session(db) as session:
-        x = session.query(Ownership).all()
-        print(x)
+        service_id = 1
+        first_contacts = (
+            session.query(Ownership)
+            .where(Ownership.service_id == service_id, Ownership.first_contact == True)
+            .all()
+        )
+
+        print(first_contacts)
+
+        all = session.query(Ownership).all()
+        print(all)

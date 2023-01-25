@@ -35,7 +35,7 @@ def get_first_contact_emails(service_id: int) -> list[str]:
     with Session(engine) as session:
         first_contacts = (
             session.query(Ownership)
-            .where(Ownership.service_id == service_id, Ownership.first_contact is True)
+            .where(Ownership.service_id == service_id, Ownership.first_contact == True)
             .all()
         )
 
