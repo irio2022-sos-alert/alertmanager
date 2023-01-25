@@ -86,7 +86,7 @@ def init_connection_pool() -> sqlalchemy.engine.base.Engine:
     )
 
 
-def init_db(db: sqlalchemy.engine.base.Engine) -> None:
+def migrate_db(db: sqlalchemy.engine.base.Engine) -> None:
     SQLModel.metadata.create_all(db)
 
 
@@ -98,7 +98,7 @@ if __name__ == "__main__":
     from models import Alerts
 
     db = init_connection_pool()
-    init_db(db)
+    migrate_db(db)
 
     with Session(db) as session:
         x = session.query(Alerts).all()

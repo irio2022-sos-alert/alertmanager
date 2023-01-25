@@ -6,7 +6,7 @@ from datetime import datetime
 import alert_pb2
 import alert_pb2_grpc
 import grpc
-from db import create_db_and_tables, engine
+from db import init_connection_pool, migrate_db
 from models import Admins, Alerts, Ownership, Services
 from sqlmodel import Session
 
@@ -66,7 +66,6 @@ class AlertManagerServicer(alert_pb2_grpc.AlertManagerServicer):
     def __init__(self, alertsender_endpoint: str, alertconfirmer_endpoint: str) -> None:
         self.alertsender_endpoint = alertsender_endpoint
         self.alertconfirmer_endpoint = alertconfirmer_endpoint
-        create_db_and_tables()
 
     def Alert(
         self, request: alert_pb2.AlertRequest, unused_context
@@ -115,11 +114,10 @@ class AlertManagerServicer(alert_pb2_grpc.AlertManagerServicer):
         with Session(engine) as session:
             status = make_status_message(okay=True)
             service = session.query(Services).get(request.serviceId)
-            logging.info(f"Received confirmation request for {service.id}")
             if service is None:
                 status = make_status_message(okay=False, msg="No such service!")
                 logging.info(
-                    f"Invalid confirmation request for {service.id}, {status.message}"
+                    f"Invalid confirmation request for {request.serviceId}, {status.message}"
                 )
             else:
                 alert = session.query(Alerts).get(service.id)
@@ -142,13 +140,27 @@ class AlertManagerServicer(alert_pb2_grpc.AlertManagerServicer):
             return status
 
 
-def serve(port: str, alertsender_endpoint: str, alertconfirmer_endpoint: str) -> None:
+def init_db():
+    global engine
+    engine = init_connection_pool()
+    migrate_db(engine)
+
+
+def serve() -> None:
+    # get port and endpoints of other services
+    port = os.environ.get("PORT", "50052")
+    alertsender_endpoint = os.environ.get("ALERTSENDER_ENDPOINT", "[::]:50051")
+    alertconfirmer_endpoint = os.environ.get("ALERTCONFIRMER_ENDPOINT", "[::]:50053")
     bind_address = f"[::]:{port}"
+
+    # initialize database connection
+    init_db()
+
+    # initialize servicer
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     alert_pb2_grpc.add_AlertManagerServicer_to_server(
         AlertManagerServicer(alertsender_endpoint, alertconfirmer_endpoint), server
     )
-
     server.add_insecure_port(bind_address)
     server.start()
     logging.info("Listening on %s.", bind_address)
@@ -156,8 +168,5 @@ def serve(port: str, alertsender_endpoint: str, alertconfirmer_endpoint: str) ->
 
 
 if __name__ == "__main__":
-    port = os.environ.get("PORT", "50052")
-    alertsender_endpoint = os.environ.get("ALERTSENDER_ENDPOINT", "[::]:50051")
-    alertconfirmer_endpoint = os.environ.get("ALERTCONFIRMER_ENDPOINT", "[::]:50053")
     logging.basicConfig(level=logging.INFO)
-    serve(port, alertsender_endpoint, alertconfirmer_endpoint)
+    serve()
