@@ -1,37 +1,107 @@
 import os
+import ssl
 
-from models import Alerts
-from sqlalchemy import create_engine
-from sqlalchemy_utils import create_database, database_exists
+import sqlalchemy
 from sqlmodel import Session, SQLModel
 
-POSTGRES_USER = os.getenv("POSTGRES_USER")
-POSTGRES_PWD = os.getenv("POSTGRES_PWD")
-POSTGRES_HOST = os.getenv("POSTGRES_HOST")
-POSTGRES_PORT = os.getenv("POSTGRES_PORT")
-DB_NAME = os.getenv("DB_NAME", "alerts")
 
-db_url = f"postgresql://{POSTGRES_USER}:{POSTGRES_PWD}@{POSTGRES_HOST}/{DB_NAME}"
+def connect_tcp_socket() -> sqlalchemy.engine.base.Engine:
+    """Initializes a TCP connection pool for a Cloud SQL instance of Postgres.
+    Useful for testing and, or running in a local docker container with whitelisted IP."""
+    db_host = os.environ[
+        "INSTANCE_HOST"
+    ]  # e.g. '127.0.0.1' ('172.17.0.1' if deployed to GAE Flex)
+    db_user = os.environ["DB_USER"]  # e.g. 'my-db-user'
+    db_pass = os.environ["DB_PASS"]  # e.g. 'my-db-password'
+    db_name = os.environ["DB_NAME"]  # e.g. 'my-database'
+    db_port = os.environ["DB_PORT"]  # e.g. 5432
+    connect_args = {}
 
-engine = create_engine(db_url)
+    if os.environ.get("DB_ROOT_CERT"):
+        db_root_cert = os.environ["DB_ROOT_CERT"]  # e.g. '/path/to/my/server-ca.pem'
+        db_cert = os.environ["DB_CERT"]  # e.g. '/path/to/my/client-cert.pem'
+        db_key = os.environ["DB_KEY"]  # e.g. '/path/to/my/client-key.pem'
+
+        ssl_context = ssl.SSLContext()
+        ssl_context.verify_mode = ssl.CERT_REQUIRED
+        ssl_context.load_verify_locations(db_root_cert)
+        ssl_context.load_cert_chain(db_cert, db_key)
+        connect_args["ssl_context"] = ssl_context
+
+    pool = sqlalchemy.create_engine(
+        sqlalchemy.engine.url.URL.create(
+            drivername="postgresql+pg8000",
+            username=db_user,
+            password=db_pass,
+            host=db_host,
+            port=db_port,
+            database=db_name,
+        ),
+        connect_args=connect_args,
+        pool_size=5,
+        max_overflow=2,
+        pool_timeout=30,  # 30 seconds
+        pool_recycle=1800,  # 30 minutes
+    )
+    return pool
 
 
-def create_db_and_tables():
-    if not database_exists(db_url):
-        create_database(db_url)
+def connect_unix_socket() -> sqlalchemy.engine.base.Engine:
+    """Initializes a Unix socket connection pool for a Cloud SQL instance of Postgres.
+    Preferred way of connecting to Cloud SQL when running on cloud run."""
+    db_user = os.environ["DB_USER"]  # e.g. 'my-database-user'
+    db_pass = os.environ["DB_PASS"]  # e.g. 'my-database-password'
+    db_name = os.environ["DB_NAME"]  # e.g. 'my-database'
+    unix_socket_path = os.environ[
+        "INSTANCE_UNIX_SOCKET"
+    ]  # e.g. '/cloudsql/project:region:instance'
 
-    SQLModel.metadata.create_all(engine)
+    pool = sqlalchemy.create_engine(
+        sqlalchemy.engine.url.URL.create(
+            drivername="postgresql+pg8000",
+            username=db_user,
+            password=db_pass,
+            database=db_name,
+            query={"unix_sock": "{}/.s.PGSQL.5432".format(unix_socket_path)},
+        ),
+        pool_size=5,
+        max_overflow=2,
+        pool_timeout=30,  # 30 seconds
+        pool_recycle=1800,  # 30 minutes
+    )
+    return pool
 
 
-def clean_up_db():
-    SQLModel.metadata.drop_all(engine)
+def init_connection_pool() -> sqlalchemy.engine.base.Engine:
+    # use a TCP socket when INSTANCE_HOST (e.g. 127.0.0.1) is defined
+    if os.environ.get("INSTANCE_HOST"):
+        return connect_tcp_socket()
+
+    # use a Unix socket when INSTANCE_UNIX_SOCKET (e.g. /cloudsql/project:region:instance) is defined
+    if os.environ.get("INSTANCE_UNIX_SOCKET"):
+        return connect_unix_socket()
+
+    raise ValueError(
+        "Missing database connection type. Please define one of INSTANCE_HOST, INSTANCE_UNIX_SOCKET, or INSTANCE_CONNECTION_NAME"
+    )
+
+
+def init_db(db: sqlalchemy.engine.base.Engine) -> None:
+    SQLModel.metadata.create_all(db)
+
+
+def clean_up_db(db: sqlalchemy.engine.base.Engine) -> None:
+    SQLModel.metadata.drop_all(db)
 
 
 if __name__ == "__main__":
-    create_db_and_tables()
+    from models import Alerts
 
-    with Session(engine) as session:
+    db = init_connection_pool()
+    init_db(db)
+
+    with Session(db) as session:
         x = session.query(Alerts).all()
         print(x)
 
-    clean_up_db()
+    clean_up_db(db)
