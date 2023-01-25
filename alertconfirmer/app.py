@@ -17,7 +17,9 @@ def confirm_receipt(service_id: int):
     try:
         confirmation = createReceiptConfirmation(int(service_id))
 
-        with grpc.insecure_channel(alertmanager_endpoint) as channel:
+        with grpc.secure_channel(
+            alertmanager_endpoint, grpc.ssl_channel_credentials()
+        ) as channel:
             stub = alert_pb2_grpc.AlertManagerStub(channel)
             response = stub.handleReceiptConfirmation(confirmation)
 

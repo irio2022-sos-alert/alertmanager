@@ -90,7 +90,9 @@ class AlertManagerServicer(alert_pb2_grpc.AlertManagerServicer):
             self.alertconfirmer_endpoint, service
         )
 
-        with grpc.insecure_channel(self.alertsender_endpoint) as channel:
+        with grpc.secure_channel(
+            self.alertsender_endpoint, grpc.ssl_channel_credentials()
+        ) as channel:
             stub = alert_pb2_grpc.AlertSenderStub(channel)
             for email in emails:
                 notification = make_alert_notification(
