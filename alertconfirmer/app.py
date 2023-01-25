@@ -8,14 +8,20 @@ from flask import Flask
 app = Flask(__name__)
 
 
-def createReceiptConfirmation(service_id: int) -> alert_pb2.ReceiptConfirmation:
+def create_receipt_confirmation(service_id: int) -> alert_pb2.ReceiptConfirmation:
     return alert_pb2.ReceiptConfirmation(serviceId=service_id)
+
+
+@app.before_first_request
+def init():
+    global alertmanager_endpoint
+    alertmanager_endpoint = os.getenv("ALERTMANAGER_ENDPOINT", "[::]:50052")
 
 
 @app.route("/<service_id>")
 def confirm_receipt(service_id: int):
     try:
-        confirmation = createReceiptConfirmation(int(service_id))
+        confirmation = create_receipt_confirmation(int(service_id))
 
         with grpc.secure_channel(
             alertmanager_endpoint, grpc.ssl_channel_credentials()
@@ -33,5 +39,4 @@ def confirm_receipt(service_id: int):
 
 
 if __name__ == "__main__":
-    alertmanager_endpoint = os.getenv("ALERTMANAGER_ENDPOINT", "[::]:50052")
     app.run()
