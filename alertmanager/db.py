@@ -12,11 +12,14 @@ POSTGRES_USER = os.getenv("POSTGRES_USER")
 POSTGRES_PWD = os.getenv("POSTGRES_PWD")
 POSTGRES_HOST = os.getenv("POSTGRES_HOST")
 POSTGRES_PORT = os.getenv("POSTGRES_PORT")
-DB_NAME = os.getenv("POSTGRES_PORT", "alerts")
+DB_NAME = os.getenv("DB_NAME", "alerts")
 
 db_url = f"postgresql://{POSTGRES_USER}:{POSTGRES_PWD}@{POSTGRES_HOST}/{DB_NAME}"
 
-engine = create_engine(db_url)
+try:
+    engine = create_engine(db_url)
+except:
+    print("Couldn't connect to db!")
 
 
 def create_db_and_tables():

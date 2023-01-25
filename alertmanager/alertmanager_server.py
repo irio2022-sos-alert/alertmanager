@@ -80,6 +80,7 @@ class AlertManagerServicer(alert_pb2_grpc.AlertManagerServicer):
 
         register_alert(service.id)
         emails = get_first_contact_emails(service.id)
+        logging.info(f"Received valid alert request for service_id: {service.id}")
 
         alerting_routine_status = make_status_message(okay=True)
         confirmation_link = make_confirmation_link(
@@ -94,9 +95,16 @@ class AlertManagerServicer(alert_pb2_grpc.AlertManagerServicer):
                 )
                 call_status = stub.SendNotification(notification)
                 if call_status.okay is False:
+                    logging.info(
+                        f"Failed to notify {email} about issues with service_id: {service.id}"
+                    )
                     alerting_routine_status = make_status_message(
                         okay=False,
                         msg="Not all calls to alertsender service were successful",
+                    )
+                else:
+                    logging.info(
+                        f"Sent out notification to {email} about issues with service_id: {service.id}"
                     )
 
         return alerting_routine_status
@@ -107,8 +115,12 @@ class AlertManagerServicer(alert_pb2_grpc.AlertManagerServicer):
         with Session(engine) as session:
             status = make_status_message(okay=True)
             service = session.query(Services).get(request.serviceId)
+            logging.info(f"Received confirmation request for {service.id}")
             if service is None:
                 status = make_status_message(okay=False, msg="No such service!")
+                logging.info(
+                    f"Invalid confirmation request for {service.id}, {status.message}"
+                )
             else:
                 alert = session.query(Alerts).get(service.id)
 
@@ -117,11 +129,16 @@ class AlertManagerServicer(alert_pb2_grpc.AlertManagerServicer):
                         okay=False,
                         msg="No ongoing alerting routine for this service!",
                     )
+                    logging.info(
+                        f"Invalid confirmation request for {service.id}, {status.message}"
+                    )
                 else:
                     alert.delete()
                     session.commit()
+                    logging.info(
+                        f"Alert routine successfully called off for service_id: {service.id}"
+                    )
 
-            print(status)
             return status
 
 
