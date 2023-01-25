@@ -1,4 +1,5 @@
 import logging
+import os
 
 import alert_pb2
 import alert_pb2_grpc
@@ -24,8 +25,8 @@ def test_send_confirmation(stub: alert_pb2_grpc.AlertManagerStub):
 
 
 def test_send_alert_request(stub: alert_pb2_grpc.AlertManagerStub):
-    request = create_alert_request(20)
-    response = stub.handleReceiptConfirmation(request)
+    request = create_alert_request(1)
+    response = stub.Alert(request)
 
     if response.okay:
         print("Request handled!")
@@ -34,12 +35,14 @@ def test_send_alert_request(stub: alert_pb2_grpc.AlertManagerStub):
 
 
 def run():
-    with grpc.insecure_channel("localhost:50052") as channel:
+    endpoint = os.getenv("MANAGER_ENDPOINT", "localhost:50052")
+    logging.info(f"endpoint : {endpoint}")
+    with grpc.insecure_channel(endpoint) as channel:
         stub = alert_pb2_grpc.AlertManagerStub(channel)
-        test_send_confirmation(stub)
+        # test_send_confirmation(stub)
         test_send_alert_request(stub)
 
 
 if __name__ == "__main__":
-    logging.basicConfig()
+    logging.basicConfig(level=logging.INFO)
     run()
