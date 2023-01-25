@@ -27,7 +27,7 @@ def send_test_email(stub: alert_pb2_grpc.AlertSenderStub):
 def run():
     endpoint = os.getenv("SENDER_ENDPOINT", "localhost:50051")
     logging.info(f"endpoint : {endpoint}")
-    with grpc.insecure_channel(endpoint) as channel:
+    with grpc.secure_channel(endpoint, grpc.ssl_channel_credentials()) as channel:
         stub = alert_pb2_grpc.AlertSenderStub(channel)
         send_test_email(stub)
 
