@@ -35,12 +35,12 @@ def test_send_alert_request(stub: alert_pb2_grpc.AlertManagerStub) -> None:
 
 
 def run():
-    endpoint = os.getenv("MANAGER_ENDPOINT", "localhost:50052")
+    endpoint = os.getenv("ALERTMANAGER_ENDPOINT", "localhost:50052")
     logging.info(f"endpoint : {endpoint}")
     with grpc.secure_channel(endpoint, grpc.ssl_channel_credentials()) as channel:
         stub = alert_pb2_grpc.AlertManagerStub(channel)
-        test_send_confirmation(stub)
         test_send_alert_request(stub)
+        test_send_confirmation(stub)
 
 
 if __name__ == "__main__":
