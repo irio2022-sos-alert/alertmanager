@@ -4,20 +4,17 @@ import os
 import alert_pb2
 import alert_pb2_grpc
 import grpc
-from dotenv import load_dotenv
-
-load_dotenv()
 
 
-def create_notification_order():
+def create_notification_order() -> alert_pb2.NotificationRequest:
     return alert_pb2.NotificationRequest(
-        email_address=os.environ.get("SENDER_EMAIL"),
+        email_address=os.environ["SENDER_EMAIL"],
         subject="test",
         content="RPCGreeterServerTest",
     )
 
 
-def send_test_email(stub):
+def send_test_email(stub: alert_pb2_grpc.AlertSenderStub):
     order = create_notification_order()
     response = stub.SendNotification(order)
 
@@ -28,11 +25,13 @@ def send_test_email(stub):
 
 
 def run():
-    with grpc.insecure_channel("localhost:50051") as channel:
+    endpoint = os.getenv("SENDER_ENDPOINT", "localhost:50051")
+    logging.info(f"endpoint : {endpoint}")
+    with grpc.insecure_channel(endpoint) as channel:
         stub = alert_pb2_grpc.AlertSenderStub(channel)
         send_test_email(stub)
 
 
 if __name__ == "__main__":
-    logging.basicConfig()
+    logging.basicConfig(level=logging.INFO)
     run()
