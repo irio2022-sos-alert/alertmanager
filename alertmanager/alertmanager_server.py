@@ -40,7 +40,7 @@ def get_first_contact_emails(service_id: int) -> list[str]:
         )
 
         first_contacts_ids = [contact.admin_id for contact in first_contacts]
-        admins = session.query(Admins).where(Admins.id in first_contacts_ids)
+        admins = session.query(Admins).where(Admins.id.in_(first_contacts_ids)).all()
 
         return [admin.email for admin in admins]
 
