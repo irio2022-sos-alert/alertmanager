@@ -15,7 +15,7 @@ def create_alert_request(service_id: int) -> alert_pb2.AlertRequest:
 
 
 def test_send_confirmation(stub: alert_pb2_grpc.AlertManagerStub):
-    confirmation = create_receipt_confirmation(20)
+    confirmation = create_receipt_confirmation(1)
     response = stub.handleReceiptConfirmation(confirmation)
 
     if response.okay:
@@ -29,7 +29,7 @@ def test_send_alert_request(stub: alert_pb2_grpc.AlertManagerStub) -> None:
     response = stub.Alert(request)
 
     if response.okay:
-        print("Request handled!")
+        print(f"Request handled!, msg : {response.message}")
     else:
         print(response.message)
 

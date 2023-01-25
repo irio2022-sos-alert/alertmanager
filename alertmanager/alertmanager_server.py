@@ -140,7 +140,7 @@ class AlertManagerServicer(alert_pb2_grpc.AlertManagerServicer):
                         f"Invalid confirmation request for {service.id}, {status.message}"
                     )
                 else:
-                    alert.delete()
+                    session.delete(alert)
                     session.commit()
                     logging.info(
                         f"Alert routine successfully called off for service_id: {service.id}"
