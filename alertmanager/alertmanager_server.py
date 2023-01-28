@@ -56,7 +56,7 @@ def alert_exists(service_id: int) -> bool:
 
 def register_alert(service: Services) -> None:
     with Session(engine) as session:
-        deadline = datetime.datetime.now(timezone.utc)
+        deadline = datetime.now(timezone.utc)
         deadline += timedelta(seconds=service.allowed_response_time)
         session.add(Alerts(service_id=service.id, deadline=deadline))
         session.commit()
