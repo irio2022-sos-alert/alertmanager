@@ -6,91 +6,115 @@ Here is a design diagram of whole project:
 
 In this repo we extracted the part of the system that is responsible for handling alert delivery and confirmation of receipt.
 
-## Alertsender
+- ### Alertsender
 
-This service is responsible for delivering emails to a given recipient. It is an auxiliary service for alertmanager since it only handles the logic of sending emails via sendgrid API.
+- ### Alertconfirmer
 
-### Build
+- ### Alertmanager
 
-Remember to set `GCP_PROJECT` variable. (for local deployment its value doesn't matter but it cannot be empty since `//` is an illegal pattern in a container tag)
+---
 
-```
-docker build -t gcr.io/$GCP_PROJECT/alertsender:latest alertsender
-```
+## Local setup
 
-### Run
+One has to define following env variables (example of an .env file, specific values may differ):
 
-To run it one has to export a few env variables:
-
-```
-SENDGRID_API_KEY=xxx  #get it from sendgrid website
-SENDER_EMAIL=john.doe@gmail.com # email which is configured in sendgrid to send out messages
-PORT=localhost::50051 #on which port should the service run
-```
-
-Running container, given variables mentioned above are defined in an .env file
-
-```
-docker run -p $PORT:$PORT  --env-file .env  gcr.io/$GCP_PROJECT/alertsender:latest
-```
-
-## Alertconfirmer
-
-[Description]
-
-### Build
-
-```
-docker build -t gcr.io/$GCP_PROJECT/alertconfirmer:latest alertconfirmer
-```
-
-### Run
-
-First export following variables or place them in an .env file.
-
-```
-ALERTMANAGER_ENDPOINT=[::]:50052 # endpoint on which alertmanager service is listening on
-PORT=localhost::50053 # on which port should the service run
-```
-
-Start container:
-
-```
-docker run -p $PORT:$PORT  --env-file .env  gcr.io/$GCP_PROJECT/alertconfirmer:latest
-```
-
-## Alertmanager
-
-[Desc]
-
-### Build
-
-```
-docker build -t gcr.io/$GCP_PROJECT/alertmanager:latest alertmanager
-```
-
-### Run
-
-First export following variables or place them in an .env file.
-
-```
-ALERTSENDER_ENDPOINT=[::]:50051 # endpoint on which alertsender service is listening on
-ALERTCONFIRMER_ENDPOINT=[::]:50053 # endpoint on which alertconfirmer service is listening on
-PORT=localhost::50052 # on which port should the service run
-```
-
-Furthermore one has to export/define in an .env file following db connection parameters:
-
-```
+```bash
+INSTANCE_HOST=xxxxxxxx # IP of the postgres database
 DB_USER=postgres
-DB_PASS=h#}+UM0J&1]sF/9/
+DB_PASS=xxxxxxxx
 DB_NAME=alerts
 DB_PORT=5432
-INSTANCE_HOST=127.0.0.1 # database host
+ALERTSENDER_ENDPOINT=[::]:50051
+ALERTMANAGER_ENDPOINT=[::]:50052
+ALERTCONFIRMER_ENDPOINT=[::]:50053
 ```
 
-Start container:
+### Build
+
+```bash
+docker build -t alertsender:latest alertsender
+docker build -t alertmanager:latest alertmanager
+docker build -t alertconfirmer:latest alertconfirmer
+```
+
+### Run
 
 ```
-docker run -p $PORT:$PORT  --env-file .env  gcr.io/$GCP_PROJECT/alertconfirmer:latest
+docker run -d -p 50051:50051  --env-file .env alertsender:latest
+docker run -d -p 50052:50052  --env-file .env alertmanager:latest
+docker run -d -p 50053:50053  --env-file .env alertconfirmer:latest
+```
+
+---
+
+## Cloud run setup
+
+Env variables for docker containers:
+
+```bash
+INSTANCE_UNIX_SOCKET=/cloudsql/project_id:region:instance
+DB_USER=postgres
+DB_PASS=xxxxxxxx
+DB_NAME=alerts
+DB_PORT=5432
+ALERTMANAGER_ENDPOINT=alertmanager-xxxxxxxx-lz.a.run.app:443
+ALERTSENDER_ENDPOINT=alertsender-xxxxxxxx-lz.a.run.app:443
+ALERTCONFIRMER_ENDPOINT=alertconfirmer-xxxxxxxx-lz.a.run.app:443
+```
+
+Env variables for deployment:
+
+```bash
+GCP_PROJECT=xxx # Google cloud project id e.g. cloudruntest-123456
+SENDER_IMAGE_NAME=xxx
+MANAGER_IMAGE_NAME=xxx
+CONFIRMER_IMAGE_NAME=xxx
+GCP_ALERTSENDER_APP_NAME
+GCP_ALERTSENDER_APP_NAME
+GCP_ALERTSENDER_APP_NAME
+```
+
+### Build
+
+Build docker images and push them to the container registry:
+
+```bash
+./scripts/build-docker.sh alertsender $SENDER_IMAGE_NAME
+./scripts/build-docker.sh alertmanager $MANAGER_IMAGE_NAME
+./scripts/build-docker.sh alertconfirmer $CONFIRMER_IMAGE_NAME
+```
+
+### Deploy
+
+When deploying for the first time there are a few caveats:
+
+- We cannot deduce endpoints of each service before they are deployed for the first time.
+  Hence, we will need to update those values after reading those endpoints.
+- We have to set necessary secrets/env variables for each service. Next revisions will inherit those variables, so it is only one time hassle.
+
+```bash
+gcloud run deploy $GCP_ALERTSENDER_APP_NAME \
+--image $SENDER_IMAGE_NAME \
+--region europe-north1 \
+--platform managed \
+--allow-unauthenticated
+--env-vars-file .env.yaml
+```
+
+```bash
+gcloud run deploy $GCP_ALERTSENDER_APP_NAME \
+--image $SENDER_IMAGE_NAME \
+--region europe-north1 \
+--platform managed \
+--allow-unauthenticated
+--env-vars-file .env.yaml
+```
+
+```bash
+gcloud run deploy $GCP_ALERTSENDER_APP_NAME \
+--image $SENDER_IMAGE_NAME \
+--region europe-north1 \
+--platform managed \
+--allow-unauthenticated
+--env-vars-file .env.yaml
 ```
