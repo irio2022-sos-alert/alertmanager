@@ -51,15 +51,15 @@ docker run -d -p 50053:50053  --env-file .env alertconfirmer:latest
 
 Env variables for docker containers:
 
-```bash
-INSTANCE_UNIX_SOCKET=/cloudsql/project_id:region:instance
-DB_USER=postgres
-DB_PASS=xxxxxxxx
-DB_NAME=alerts
-DB_PORT=5432
-ALERTMANAGER_ENDPOINT=alertmanager-xxxxxxxx-lz.a.run.app:443
-ALERTSENDER_ENDPOINT=alertsender-xxxxxxxx-lz.a.run.app:443
-ALERTCONFIRMER_ENDPOINT=alertconfirmer-xxxxxxxx-lz.a.run.app:443
+```yaml
+INSTANCE_UNIX_SOCKET: /cloudsql/project_id:region:instance
+DB_USER: postgres
+DB_PASS: xxxxxxxx
+DB_NAME: alerts
+DB_PORT: 5432
+ALERTMANAGER_ENDPOINT: alertmanager-xxxxxxxx-lz.a.run.app:443
+ALERTSENDER_ENDPOINT: alertsender-xxxxxxxx-lz.a.run.app:443
+ALERTCONFIRMER_ENDPOINT: alertconfirmer-xxxxxxxx-lz.a.run.app:443
 ```
 
 Env variables for deployment:
