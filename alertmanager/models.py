@@ -11,7 +11,6 @@ class Services(SQLModel, table=True):
     frequency: int
     alerting_window: int
     allowed_response_time: int
-    email: str
 
 
 class Admins(SQLModel, table=True):
