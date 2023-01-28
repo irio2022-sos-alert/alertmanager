@@ -1,7 +1,7 @@
 import logging
 import os
 from concurrent import futures
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 
 import alert_pb2
 import alert_pb2_grpc
@@ -54,9 +54,11 @@ def alert_exists(service_id: int) -> bool:
         return session.query(Alerts).get(service_id) is not None
 
 
-def register_alert(service_id: int):
+def register_alert(service: Services) -> None:
     with Session(engine) as session:
-        session.add(Alerts(service_id=service_id))
+        deadline = datetime.datetime.now(timezone.utc)
+        deadline += timedelta(seconds=service.allowed_response_time)
+        session.add(Alerts(service_id=service.id, deadline=deadline))
         session.commit()
 
 
