@@ -5,6 +5,7 @@ package alert;
 // alertmanager service definition
 service AlertManager {
   rpc Alert(AlertRequest) returns (Status) {}
+  rpc HandleResponseDeadline(AlertRequest) returns (Status) {}
   rpc handleReceiptConfirmation(ReceiptConfirmation) returns (Status) {}
 }
 

@@ -31,16 +31,20 @@ def make_confirmation_link(alertconfirmer_endpoint: str, service: Services):
     return f"{alertconfirmer_endpoint}/{service.id}"
 
 
-def get_first_contact_emails(service_id: int) -> list[str]:
+def get_contact_emails(service_id: int, first_contact: bool) -> list[str]:
     with Session(engine) as session:
-        first_contacts = (
-            session.query(Ownership)
-            .where(Ownership.service_id == service_id, Ownership.first_contact == True)
-            .all()
-        )
+        if first_contact:
+            contacts = (
+                session.query(Ownership)
+                .where(
+                    Ownership.service_id == service_id,
+                    Ownership.first_contact == first_contact,
+                )
+                .all()
+            )
 
-        first_contacts_ids = [contact.admin_id for contact in first_contacts]
-        admins = session.query(Admins).where(Admins.id.in_(first_contacts_ids)).all()
+        contacts_ids = [contact.admin_id for contact in contacts]
+        admins = session.query(Admins).where(Admins.id.in_(contacts_ids)).all()
 
         return [admin.email for admin in admins]
 
@@ -83,7 +87,7 @@ class AlertManagerServicer(alert_pb2_grpc.AlertManagerServicer):
         else:
             register_alert(service.id)
 
-        emails = get_first_contact_emails(service.id)
+        emails = get_contact_emails(service.id, True)
         logging.info(f"Received valid alert request for service_id: {service.id}")
         if len(emails) == 0:
             logging.info("No emails are assigned to this service!")
@@ -116,6 +120,58 @@ class AlertManagerServicer(alert_pb2_grpc.AlertManagerServicer):
                     )
 
         return alerting_routine_status
+
+    def HandleResponseDeadline(self, request, context):
+
+        with Session(engine) as session:
+            service = session.query(Services).get(request.serviceId)
+            alert = session.query(Alerts).get(service.id)
+
+            if service is None:
+                logging.info(
+                    f"Invalid response deadline request for {request.serviceId}, No such service!"
+                )
+                return make_status_message(okay=False, msg="No such service!")
+
+            if alert is None:
+                logging.info(
+                    f"Invalid confirmation request for {service.id}, No ongoing alerting routine for this service!"
+                )
+                return make_status_message(
+                    okay=False, msg="No ongoing alerting routine for this service!"
+                )
+
+            alerting_routine_status = make_status_message(okay=True)
+            emails = get_contact_emails(service.id, first_contact=False)
+            confirmation_link = make_confirmation_link(
+                self.alertconfirmer_endpoint, service
+            )
+
+            with grpc.secure_channel(
+                self.alertsender_endpoint, grpc.ssl_channel_credentials()
+            ) as channel:
+                stub = alert_pb2_grpc.AlertSenderStub(channel)
+                for email in emails:
+                    notification = make_alert_notification(
+                        email, service, confirmation_link
+                    )
+                    call_status = stub.SendNotification(notification)
+                    if call_status.okay is False:
+                        logging.info(
+                            f"Failed to notify {email} about issues with service_id: {service.id}"
+                        )
+                        alerting_routine_status = make_status_message(
+                            okay=False,
+                            msg="Not all calls to alertsender service were successful",
+                        )
+                    else:
+                        logging.info(
+                            f"Sent out notification to {email} about issues with service_id: {service.id}"
+                        )
+
+            # call off alerting routine
+            session.delete(alert)
+            return alerting_routine_status
 
     def handleReceiptConfirmation(
         self, request: alert_pb2.ReceiptConfirmation, unused_context
