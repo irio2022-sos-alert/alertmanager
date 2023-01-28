@@ -89,7 +89,7 @@ Build docker images and push them to the container registry:
 When deploying for the first time there are a few caveats:
 
 - We cannot deduce endpoints of each service before they are deployed for the first time.
-  Hence, we will need to update those values after reading those endpoints.
+  Hence, we will need to update those values after first failed deployment.
 - We have to set necessary secrets/env variables for each service. Next revisions will inherit those variables, so it is only one time hassle.
 
 ```bash
@@ -102,17 +102,18 @@ gcloud run deploy $GCP_ALERTSENDER_APP_NAME \
 ```
 
 ```bash
-gcloud run deploy $GCP_ALERTSENDER_APP_NAME \
---image $SENDER_IMAGE_NAME \
+gcloud run deploy $GCP_ALERTMANAGER_APP_NAME \
+--image $MANAGER_IMAGE_NAME \
 --region europe-north1 \
 --platform managed \
 --allow-unauthenticated
 --env-vars-file .env.yaml
+--add-cloudsql-instances=INSTANCE_CONNECTION_NAME
 ```
 
 ```bash
-gcloud run deploy $GCP_ALERTSENDER_APP_NAME \
---image $SENDER_IMAGE_NAME \
+gcloud run deploy $GCP_ALERTCONFIRMER_APP_NAME \
+--image $CONFIRMER_IMAGE_NAME \
 --region europe-north1 \
 --platform managed \
 --allow-unauthenticated
