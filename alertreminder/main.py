@@ -26,7 +26,9 @@ def init_db():
 def getExpiredAlerts():
     with Session(engine) as session:
         now = datetime.now(timezone.utc)
-        return session.query(Alerts).where(Alerts.deadline >= now).all()
+        expired_alerts = session.query(Alerts).where(Alerts.deadline < now).all()
+        logging.info(f"Found expired alerts: {len(expired_alerts)}")
+        return expired_alerts
 
 
 @task
