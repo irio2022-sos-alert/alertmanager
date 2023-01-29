@@ -131,3 +131,47 @@ gcloud run deploy $GCP_ALERTREMINDER_APP_NAME \
 --cpu-throttling
 --min-instances=1
 ```
+
+## Testing
+
+We have functional, stress and load tests. Since they cause quite a strain on the system it is advised to run them only on a non-prod environments/deployments.
+
+### Setup
+
+Again several environment variables have to exported:
+
+```bash
+API_ENDPOINT=https://datamanager-api-2xieibhnsq-lz.a.run.app # endpoint of datamanager api service
+INSTANCE_HOST=28.222.222.000 # IP of the database used by the deployment
+DB_USER: postgres
+DB_PASS: xxxxxxxx
+DB_NAME: alerts
+DB_PORT: 5432
+```
+
+And some dependencies must be installed. Run following:(please use python virtualenv for better experience):
+
+```bash
+cd tests
+pip install -r requirements.txt
+```
+
+### Testing
+
+To run all tests (inside `tests` directory):
+
+```bash
+py.test
+```
+
+To run functional tests:
+
+```
+py.test integration_test.py
+```
+
+To run load tests (they might take a while):
+
+```
+py.test load_test.py
+```
