@@ -158,7 +158,7 @@ pip install -r requirements.txt
 
 ### Testing
 
-To run all tests (inside `tests` directory):
+To run all tests (all following commands assume being in `tests` directory):
 
 ```bash
 py.test
@@ -175,3 +175,15 @@ To run load tests (they might take a while):
 ```
 py.test load_test.py
 ```
+
+### CI/CD
+
+There is a CI/CD workflow defined for this repository. It is triggered by pushing/pulling any changes to the `master` branch.
+It consists of four stages:
+
+- authenticating in gcloud cli
+- building docker containers for each service
+- pushing containers to a remote container registry
+- deploying all services to cloud run
+
+It will not work if the services are not set up manually for the first time! That's because, as mentioned before, service endpoints cannot be deduced beforehand.
