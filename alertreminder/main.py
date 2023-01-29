@@ -53,6 +53,7 @@ def background_task():
     interval = os.getenv("TIMEDELTA", 20)
     schedule = IntervalSchedule(interval=timedelta(seconds=interval))
     flow.schedule = schedule
+    logging.info(f"Staring flow with interval: {interval}")
     flow.run()
 
 

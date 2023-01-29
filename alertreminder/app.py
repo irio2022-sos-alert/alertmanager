@@ -1,4 +1,4 @@
-import os
+import logging
 from multiprocessing import Process
 
 from flask import Flask
@@ -6,7 +6,7 @@ from main import background_task
 
 app = Flask(__name__)
 
-task_started_file = "task_started.txt"
+logging.basicConfig(level=logging.INFO)
 
 
 @app.route("/")
@@ -14,11 +14,8 @@ def home():
     return "Background task running"
 
 
-if not os.path.exists(task_started_file):
-    p = Process(target=background_task)
-    p.start()
-    with open(task_started_file, "w") as f:
-        f.write("task started")
+p = Process(target=background_task)
+p.start()
 
 if __name__ == "__main__":
     app.run(debug=True)
