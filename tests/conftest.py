@@ -11,15 +11,12 @@ def input_value():
 
 @pytest.fixture(scope="module")
 def session():
-    def setup():
-        engine = init_connection_pool()
-        clean_up_db(engine)
-        migrate_db(engine)
-        return engine
+    engine = init_connection_pool()
+    clean_up_db(engine)
+    migrate_db(engine)
 
-    pool = setup()
-    with Session(pool) as session:
+    with Session(engine) as session:
         yield session
 
-    clean_up_db(pool)
-    pool.dispose()
+    clean_up_db(engine)
+    engine.dispose()
