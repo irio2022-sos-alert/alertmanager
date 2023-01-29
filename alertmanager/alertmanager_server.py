@@ -33,15 +33,15 @@ def make_confirmation_link(alertconfirmer_endpoint: str, service: Services):
 
 def get_contact_emails(service_id: int, first_contact: bool) -> list[str]:
     with Session(engine) as session:
-        if first_contact:
-            contacts = (
-                session.query(Ownership)
-                .where(
-                    Ownership.service_id == service_id,
-                    Ownership.first_contact == first_contact,
-                )
-                .all()
+
+        contacts = (
+            session.query(Ownership)
+            .where(
+                Ownership.service_id == service_id,
+                Ownership.first_contact == first_contact,
             )
+            .all()
+        )
 
         contacts_ids = [contact.admin_id for contact in contacts]
         admins = session.query(Admins).where(Admins.id.in_(contacts_ids)).all()
