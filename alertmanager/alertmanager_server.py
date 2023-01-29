@@ -137,10 +137,11 @@ class AlertManagerServicer(alert_pb2_grpc.AlertManagerServicer):
 
             if alert is None:
                 logging.info(
-                    f"Invalid confirmation request for {service.id}, No ongoing alerting routine for this service!"
+                    f"Invalid response deadline request for {service.id}, No ongoing alerting routine for this service!"
                 )
                 return make_status_message(
-                    okay=False, msg="No ongoing alerting routine for this service!"
+                    okay=False,
+                    msg="Can't resend email, couldn't find alerting routine!",
                 )
 
             alerting_routine_status = make_status_message(okay=True)
@@ -173,6 +174,7 @@ class AlertManagerServicer(alert_pb2_grpc.AlertManagerServicer):
 
             # call off alerting routine
             session.delete(alert)
+            session.commit()
             return alerting_routine_status
 
     def handleReceiptConfirmation(
