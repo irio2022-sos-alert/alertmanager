@@ -2,7 +2,14 @@ import os
 import ssl
 
 import sqlalchemy
-from sqlmodel import Session, SQLModel
+from sqlalchemy.ext.compiler import compiles
+from sqlalchemy.schema import DropTable
+from sqlmodel import SQLModel
+
+
+@compiles(DropTable, "postgresql")
+def _compile_drop_table(element, compiler, **kwargs):
+    return compiler.visit_drop_table(element) + " CASCADE"
 
 
 def connect_tcp_socket() -> sqlalchemy.engine.base.Engine:
@@ -98,20 +105,5 @@ if __name__ == "__main__":
     from models import Admins, Ownership
 
     db = init_connection_pool()
+    clean_up_db(db)
     migrate_db(db)
-
-    with Session(db) as session:
-        service_id = 1
-        first_contacts = (
-            session.query(Ownership)
-            .where(Ownership.service_id == service_id, Ownership.first_contact == True)
-            .all()
-        )
-        first_contacts_ids = [contact.admin_id for contact in first_contacts]
-        admins = session.query(Admins).where(Admins.id.in_(first_contacts_ids)).all()
-        print(first_contacts)
-        print(first_contacts_ids)
-        print(admins)
-
-        all = session.query(Ownership).all()
-        print(all)

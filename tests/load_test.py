@@ -13,4 +13,4 @@ def test_divisible_by_6(input_value):
 
 def test_db(session: Session):
     services = session.query(Services).all()
-    assert len(services) == 5
+    assert len(services) == 0

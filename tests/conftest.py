@@ -1,5 +1,5 @@
 import pytest
-from db import init_connection_pool, migrate_db
+from db import clean_up_db, init_connection_pool, migrate_db
 from sqlmodel import Session
 
 
@@ -11,7 +11,15 @@ def input_value():
 
 @pytest.fixture
 def session():
-    pool = init_connection_pool()
-    migrate_db(pool)
+    def setup():
+        engine = init_connection_pool()
+        clean_up_db(engine)
+        migrate_db(engine)
+        return engine
+
+    pool = setup()
     with Session(pool) as session:
         yield session
+
+    clean_up_db(pool)
+    pool.dispose()
