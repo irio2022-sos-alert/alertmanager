@@ -11,12 +11,15 @@ from prefect import Flow, task
 from prefect.schedules import IntervalSchedule
 from sqlmodel import Session
 
-interval = os.getenv("TIMEDELTA", 20)
-schedule = IntervalSchedule(interval=timedelta(seconds=interval))
-
 
 def make_deadline_notification(alert: Alerts) -> alert_pb2.AlertRequest:
     return alert_pb2.AlertRequest(serviceId=alert.service_id)
+
+
+def init_db():
+    global engine
+    engine = init_connection_pool()
+    migrate_db(engine)
 
 
 @task
@@ -39,19 +42,20 @@ def notify(expired_alerts: list[Alerts], endpoint: str) -> None:
             )
 
 
-def init_db():
-    global engine
-    engine = init_connection_pool()
-    migrate_db(engine)
-
-
-with Flow("Response deadline ticker", schedule=schedule) as flow:
+with Flow("Response deadline ticker") as flow:
     endpoint = os.getenv("ALERTMANAGER_ENDPOINT", "localhost:50052")
     expired_alerts = getExpiredAlerts()
     notify(expired_alerts, endpoint)
 
 
+def background_task():
+    init_db()
+    interval = os.getenv("TIMEDELTA", 20)
+    schedule = IntervalSchedule(interval=timedelta(seconds=interval))
+    flow.schedule = schedule
+    flow.run()
+
+
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
-    init_db()
-    flow.run()
+    background_task()
