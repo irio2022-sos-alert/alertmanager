@@ -14,6 +14,7 @@ jobs:
       SENDER_IMAGE_NAME: gcr.io/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.GCP_ALERTSENDER_APP_NAME }}:latest
       MANAGER_IMAGE_NAME: gcr.io/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.GCP_MANAGER_APP_NAME }}:latest
       CONFIRMER_IMAGE_NAME: gcr.io/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.GCP_CONFIRMER_APP_NAME }}:latest
+      REMINDER_IMAGE_NAME: gcr.io/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.GCP_REMINDER_APP_NAME }}:latest
     steps:
       - name: Login
         uses: google-github-actions/setup-gcloud@v0
@@ -40,6 +41,10 @@ jobs:
         run: ./scripts/build-docker.sh alertmanager $MANAGER_IMAGE_NAME
         shell: bash
 
+      - name: Build reminder docker
+        run: ./scripts/build-docker.sh alertreminder $REMINDER_IMAGE_NAME
+        shell: bash
+
       - name: Deploy sender docker
         run: ./scripts/deploy.sh ${{ secrets.GCP_ALERTSENDER_APP_NAME }} $SENDER_IMAGE_NAME
         shell: bash
@@ -50,4 +55,8 @@ jobs:
 
       - name: Deploy manager docker
         run: ./scripts/deploy.sh ${{ secrets.GCP_MANAGER_APP_NAME }} $MANAGER_IMAGE_NAME
+        shell: bash
+
+      - name: Deploy reminder docker
+        run: ./scripts/deploy.sh ${{ secrets.GCP_REMINDER_APP_NAME }} $REMINDER_IMAGE_NAME
         shell: bash

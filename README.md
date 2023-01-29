@@ -122,7 +122,7 @@ gcloud run deploy $GCP_ALERTCONFIRMER_APP_NAME \
 
 ```bash
 gcloud run deploy $GCP_ALERTREMINDER_APP_NAME \
---image $REMINDER \
+--image $REMINDER_IMAGE_NAME \
 --region europe-north1 \
 --platform managed \
 --allow-unauthenticated
