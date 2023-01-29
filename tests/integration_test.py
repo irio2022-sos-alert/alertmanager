@@ -2,9 +2,7 @@ import os
 import time
 
 import pytest
-import requests
 from models import Alerts, Services
-from requests import Response
 from sqlmodel import Session
 from utils import call_datamanager_api
 
