@@ -1,10 +1,12 @@
 import logging
 import os
+import sys
 from datetime import datetime, timedelta, timezone
 
 import alert_pb2
 import alert_pb2_grpc
 import grpc
+import psutil
 from db import init_connection_pool, migrate_db
 from models import Alerts
 from prefect import Flow, task
@@ -50,11 +52,19 @@ with Flow("Response deadline ticker") as flow:
     notify(expired_alerts, endpoint)
 
 
+def kickoff_auto_heal(task, old_state, new_state):
+    if new_state.is_failed():
+        p = psutil.Process(os.getppid())
+        p.terminate()  # or p.kill()
+        sys.exit()
+
+
 def background_task():
     init_db()
     interval = os.getenv("TIMEDELTA", 20)
     schedule = IntervalSchedule(interval=timedelta(seconds=interval))
     flow.schedule = schedule
+    flow.state_handlers = [kickoff_auto_heal]
     logging.info(f"Staring flow with interval: {interval}")
     flow.run()
 
