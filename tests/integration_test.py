@@ -6,6 +6,7 @@ import requests
 from models import Alerts, Services
 from requests import Response
 from sqlmodel import Session
+from utils import call_datamanager_api
 
 
 def test_divisible_by_3(input_value):
@@ -14,29 +15,6 @@ def test_divisible_by_3(input_value):
 
 def test_divisible_by_6(input_value):
     assert input_value % 6 == 0
-
-
-def call_datamanager_api(
-    endpoint,
-    service_name,
-    service_url,
-    frequency,
-    alerting_window,
-    allowed_resp_time,
-    email1,
-    email2,
-) -> Response:
-    endpoint += f"/change_service/{service_name}"
-    params = {
-        "url": service_url,
-        "frequency": frequency,
-        "alerting_window": alerting_window,
-        "allowed_resp_time": allowed_resp_time,
-        "email1": email1,
-        "email2": email2,
-    }
-    response = requests.post(endpoint, params=params)
-    return response
 
 
 @pytest.fixture(autouse=True, scope="module")
@@ -60,7 +38,7 @@ def test_api_config_change(session):
         frequency=3,
         alerting_window=5,
         allowed_resp_time=10000,
-        email1="sos.alert.irio2022@gmail.com",
+        email1="john.doe@gmail.com",
         email2="john.boyle@gmail.com",
     )
     assert r1.status_code == 200

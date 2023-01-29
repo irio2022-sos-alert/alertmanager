@@ -102,8 +102,50 @@ def clean_up_db(db: sqlalchemy.engine.base.Engine) -> None:
 
 
 if __name__ == "__main__":
-    from models import Admins, Ownership
+    from models import Admins, Ownership, Services
+    from sqlmodel import Session
 
+    services_count = 1000
     db = init_connection_pool()
+    with Session(db) as session:
+        print("hello")
+        admin1 = Admins(id=1, email="john.doe@gmail.com")
+        admin2 = Admins(id=2, email="john.doe@gmail.com")
+        session.add(admin1)
+        session.add(admin2)
+
+        services = []
+
+        for i in range(services_count):
+            service = Services(
+                id=i,
+                name=f"test_service_{i}",
+                domain=".com.com",
+                frequency=3,
+                alerting_window=5,
+                allowed_response_time=1000,
+            )
+            session.add(service)
+            services.append(service)
+
+        print("hello")
+
+        session.commit()
+
+        print("hello")
+        for service in services:
+            session.add(
+                Ownership(service_id=service.id, admin_id=admin1.id, first_contact=True)
+            )
+            session.add(
+                Ownership(
+                    service_id=service.id, admin_id=admin2.id, first_contact=False
+                )
+            )
+
+        print("hello")
+        session.commit()
+        print("hello")
+
     clean_up_db(db)
     migrate_db(db)

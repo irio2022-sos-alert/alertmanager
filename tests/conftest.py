@@ -9,7 +9,7 @@ def input_value():
     return input
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(autouse=True, scope="module")
 def session():
     engine = init_connection_pool()
     clean_up_db(engine)
