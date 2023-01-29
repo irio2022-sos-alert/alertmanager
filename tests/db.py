@@ -107,9 +107,11 @@ if __name__ == "__main__":
 
     services_count = 1000
     db = init_connection_pool()
+    clean_up_db(db)
+    migrate_db(db)
     with Session(db) as session:
         print("hello")
-        admin1 = Admins(id=1, email="john.doe@gmail.com")
+        admin1 = Admins(id=1, email="john.does@gmail.com")
         admin2 = Admins(id=2, email="john.doe@gmail.com")
         session.add(admin1)
         session.add(admin2)

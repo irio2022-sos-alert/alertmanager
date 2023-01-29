@@ -1,8 +1,9 @@
 import os
+import unittest
+
+from dotenv import load_dotenv
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
-import unittest
-from dotenv import load_dotenv
 
 
 class TestSendGridSetup(unittest.TestCase):
