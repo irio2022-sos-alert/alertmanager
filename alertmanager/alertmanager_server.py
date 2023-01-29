@@ -87,7 +87,7 @@ class AlertManagerServicer(alert_pb2_grpc.AlertManagerServicer):
             logging.info(f"Routine already exists for id: {request.serviceId}")
             return make_status_message(okay=True, msg="Alert is already being handled")
         else:
-            register_alert(service.id)
+            register_alert(service)
 
         emails = get_contact_emails(service.id, True)
         logging.info(f"Received valid alert request for service_id: {service.id}")

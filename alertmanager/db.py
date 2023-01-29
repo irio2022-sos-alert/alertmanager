@@ -95,13 +95,17 @@ def clean_up_db(db: sqlalchemy.engine.base.Engine) -> None:
 
 
 if __name__ == "__main__":
-    from models import Admins, Ownership
+    from models import Admins, Ownership, Services
 
     db = init_connection_pool()
     migrate_db(db)
 
     with Session(db) as session:
         service_id = 1
+
+        service = session.query(Services).get(service_id)
+        print(service)
+
         first_contacts = (
             session.query(Ownership)
             .where(Ownership.service_id == service_id, Ownership.first_contact == True)
