@@ -119,3 +119,15 @@ gcloud run deploy $GCP_ALERTCONFIRMER_APP_NAME \
 --allow-unauthenticated
 --env-vars-file .env.yaml
 ```
+
+```bash
+gcloud run deploy $GCP_ALERTREMINDER_APP_NAME \
+--image $REMINDER \
+--region europe-north1 \
+--platform managed \
+--allow-unauthenticated
+--env-vars-file .env.yaml
+--add-cloudsql-instances=INSTANCE_CONNECTION_NAME
+--cpu-throttling
+--min-instances=1
+```
