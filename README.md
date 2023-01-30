@@ -160,7 +160,7 @@ cd tests
 pip install -r requirements.txt
 ```
 
-### Testing
+### Test execution
 
 To run all tests (all following commands assume being in `tests` directory):
 
@@ -180,7 +180,7 @@ To run load tests (they might take a while):
 py.test load_test.py
 ```
 
-### CI/CD
+## CI/CD
 
 There is a CI/CD workflow defined for this repository. It is triggered by pushing/pulling any changes to the `master` branch.
 It consists of four stages:
