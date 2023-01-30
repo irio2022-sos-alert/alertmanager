@@ -66,12 +66,10 @@ Env variables for deployment:
 
 ```bash
 GCP_PROJECT=xxx # Google cloud project id e.g. cloudruntest-123456
-SENDER_IMAGE_NAME=xxx
-MANAGER_IMAGE_NAME=xxx
-CONFIRMER_IMAGE_NAME=xxx
-GCP_ALERTSENDER_APP_NAME
-GCP_ALERTSENDER_APP_NAME
-GCP_ALERTSENDER_APP_NAME
+GCP_ALERTSENDER_APP_NAME=alertsender
+GCP_ALERTSENDER_APP_NAME=alertmanager
+GCP_ALERTSENDER_APP_NAME=alertconfirmer
+INSTANCE_CONNECTION_NAME=PROJECT-ID:REGION:INSTANCE-ID # name of the cloud sql instance
 ```
 
 ### Build
@@ -79,9 +77,10 @@ GCP_ALERTSENDER_APP_NAME
 Build docker images and push them to the container registry:
 
 ```bash
-./scripts/build-docker.sh alertsender $SENDER_IMAGE_NAME
-./scripts/build-docker.sh alertmanager $MANAGER_IMAGE_NAME
-./scripts/build-docker.sh alertconfirmer $CONFIRMER_IMAGE_NAME
+./scripts/build-docker.sh alertsender gcr.io/$GCP_PROJECT/alertsender:latest
+./scripts/build-docker.sh alertmanager gcr.io/$GCP_PROJECT/alertmanager:latest
+./scripts/build-docker.sh alertconfirmer gcr.io/$GCP_PROJECT/alertconfirmer:latest
+./scripts/build-docker.sh alertreminder gcr.io/$GCP_PROJECT/alertreminder:latest
 ```
 
 ### Deploy
@@ -94,42 +93,40 @@ When deploying for the first time there are a few caveats:
 
 ```bash
 gcloud run deploy $GCP_ALERTSENDER_APP_NAME \
---image $SENDER_IMAGE_NAME \
+--image gcr.io/$GCP_PROJECT/alertsender:latest \
 --region europe-north1 \
 --platform managed \
 --allow-unauthenticated
---env-vars-file .env.yaml
+--env-vars-file .env.sender.yaml
 ```
 
 ```bash
 gcloud run deploy $GCP_ALERTMANAGER_APP_NAME \
---image $MANAGER_IMAGE_NAME \
+--image gcr.io/$GCP_PROJECT/alertmanager:latest \
 --region europe-north1 \
 --platform managed \
 --allow-unauthenticated
---env-vars-file .env.yaml
---add-cloudsql-instances=INSTANCE_CONNECTION_NAME
+--env-vars-file .env.manager.yaml
+--add-cloudsql-instances=$INSTANCE_CONNECTION_NAME
 ```
 
 ```bash
 gcloud run deploy $GCP_ALERTCONFIRMER_APP_NAME \
---image $CONFIRMER_IMAGE_NAME \
+--image gcr.io/$GCP_PROJECT/alertconfirmer:latest \
 --region europe-north1 \
 --platform managed \
 --allow-unauthenticated
---env-vars-file .env.yaml
+--env-vars-file .env.confirmer.yaml
 ```
 
 ```bash
 gcloud run deploy $GCP_ALERTREMINDER_APP_NAME \
---image $REMINDER_IMAGE_NAME \
+--image gcr.io/$GCP_PROJECT/alertreminder:latest \
 --region europe-north1 \
 --platform managed \
---allow-unauthenticated
---env-vars-file .env.yaml
---add-cloudsql-instances=INSTANCE_CONNECTION_NAME
---cpu-throttling
---min-instances=1
+--env-vars-file .env.reminder.yaml \
+--add-cloudsql-instances=$INSTANCE_CONNECTION_NAME \
+--cpu-throttling --min-instances 1
 ```
 
 ## Testing
