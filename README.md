@@ -29,7 +29,11 @@ DB_PORT=5432
 ALERTSENDER_ENDPOINT=[::]:50051
 ALERTMANAGER_ENDPOINT=[::]:50052
 ALERTCONFIRMER_ENDPOINT=[::]:50053
+SENDGRID_API_KEY=xxx  # api key which you can get from sendgrid
+SENDER_EMAIL=xxxx@gmail.com # email which is configured as a sender in sendgrid
 ```
+
+If using Cloud SQL for PostgreSQL as a storage solution you have to remember to whitelist IP of your local machine via Cloud Console in order to connect with it.
 
 ### Build
 
@@ -51,17 +55,10 @@ docker run -d -p 50053:50053  --env-file .env alertconfirmer:latest
 
 ## Cloud run setup
 
-Env variables for docker containers:
+One change compared to local deployment is use of unix sockets for connection with database. It is not possible to whitelist IPs of cloud run services so instead of `INSTANCE_HOST` we have to provide instance unix socket:
 
 ```yaml
 INSTANCE_UNIX_SOCKET: /cloudsql/project_id:region:instance
-DB_USER: postgres
-DB_PASS: xxxxxxxx
-DB_NAME: alerts
-DB_PORT: 5432
-ALERTMANAGER_ENDPOINT: alertmanager-xxxxxxxx-lz.a.run.app:443
-ALERTSENDER_ENDPOINT: alertsender-xxxxxxxx-lz.a.run.app:443
-ALERTCONFIRMER_ENDPOINT: alertconfirmer-xxxxxxxx-lz.a.run.app:443
 ```
 
 Env variables for deployment:
@@ -69,8 +66,9 @@ Env variables for deployment:
 ```bash
 GCP_PROJECT=xxx # Google cloud project id e.g. cloudruntest-123456
 GCP_ALERTSENDER_APP_NAME=alertsender
-GCP_ALERTSENDER_APP_NAME=alertmanager
-GCP_ALERTSENDER_APP_NAME=alertconfirmer
+GCP_ALERTMANAGER_APP_NAME=alertmanager
+GCP_ALERTCONFIRMER_APP_NAME=alertconfirmer
+GCP_ALERTREMINDER_APP_NAME=alertreminder
 INSTANCE_CONNECTION_NAME=PROJECT-ID:REGION:INSTANCE-ID # name of the cloud sql instance
 ```
 
@@ -85,7 +83,7 @@ Build docker images and push them to the container registry:
 ./scripts/build-docker.sh alertreminder gcr.io/$GCP_PROJECT/alertreminder:latest
 ```
 
-### Deploy
+### Deployment
 
 When deploying for the first time there are a few caveats:
 
@@ -98,7 +96,6 @@ gcloud run deploy $GCP_ALERTSENDER_APP_NAME \
 --image gcr.io/$GCP_PROJECT/alertsender:latest \
 --region europe-north1 \
 --platform managed \
---allow-unauthenticated
 --env-vars-file .env.sender.yaml
 ```
 
@@ -107,7 +104,6 @@ gcloud run deploy $GCP_ALERTMANAGER_APP_NAME \
 --image gcr.io/$GCP_PROJECT/alertmanager:latest \
 --region europe-north1 \
 --platform managed \
---allow-unauthenticated
 --env-vars-file .env.manager.yaml
 --add-cloudsql-instances=$INSTANCE_CONNECTION_NAME
 ```
@@ -130,6 +126,8 @@ gcloud run deploy $GCP_ALERTREMINDER_APP_NAME \
 --add-cloudsql-instances=$INSTANCE_CONNECTION_NAME \
 --cpu-throttling --min-instances 1
 ```
+
+---
 
 ## Testing
 
@@ -178,6 +176,8 @@ To run load tests (they might take a while):
 ```
 py.test load_test.py
 ```
+
+---
 
 ## CI/CD
 
