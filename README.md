@@ -2,7 +2,7 @@
 
 Here is a design diagram of whole project:
 
-[diagram]
+![alt text](https://github.com/[username]/[reponame]/blob/[branch]/image.jpg?raw=true)
 
 In this repo we extracted the part of the system that is responsible for handling alert delivery and confirmation of receipt.
 
