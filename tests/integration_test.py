@@ -7,14 +7,6 @@ from sqlmodel import Session
 from utils import call_datamanager_api
 
 
-def test_divisible_by_3(input_value):
-    assert input_value % 3 == 0
-
-
-def test_divisible_by_6(input_value):
-    assert input_value % 6 == 0
-
-
 @pytest.fixture(autouse=True, scope="module")
 def test_api_config_change(session):
     endpoint = os.environ["API_ENDPOINT"]
