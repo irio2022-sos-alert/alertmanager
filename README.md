@@ -1,14 +1,16 @@
 # Alertmanager
 
-Here is a design diagram of whole project:
+Here is a design diagram of the whole project:
 
-![alt text](https://github.com/[username]/[reponame]/blob/[branch]/image.jpg?raw=true)
+![alt text](.github/images/diagram.png?raw=true)
 
 In this repo we extracted the part of the system that is responsible for handling alert delivery and confirmation of receipt.
 
 - ### Alertsender
 
 - ### Alertconfirmer
+
+- ### Alertreminder
 
 - ### Alertmanager
 
