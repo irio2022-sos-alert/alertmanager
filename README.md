@@ -147,6 +147,10 @@ DB_USER: postgres
 DB_PASS: xxxxxxxx
 DB_NAME: alerts
 DB_PORT: 5432
+
+# specifically for sendgrid_test
+SENDGRID_API_KEY=xxx  # api key which you can get from sendgrid
+SENDER_EMAIL=xxxx@gmail.com # email which is configured as a sender in sendgrid
 ```
 
 And some dependencies must be installed. Run following:(please use python virtualenv for better experience):
