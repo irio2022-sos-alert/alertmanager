@@ -106,48 +106,62 @@ if __name__ == "__main__":
     from sqlmodel import Session
 
     services_count = 1000
-    db = init_connection_pool()
-    clean_up_db(db)
-    migrate_db(db)
-    with Session(db) as session:
-        print("hello")
-        admin1 = Admins(id=1, email="john.does@gmail.com")
-        admin2 = Admins(id=2, email="john.doe@gmail.com")
-        session.add(admin1)
-        session.add(admin2)
+    engine = init_connection_pool()
+    clean_up_db(engine)
+    migrate_db(engine)
 
-        services = []
+    def update_config(
+        name: str,
+        domain: str,
+        frequency: int,
+        alerting_window: int,
+        allowed_response_time: int,
+        email1: str,
+        email2: str,
+    ):
+        with Session(engine) as session:
 
-        for i in range(services_count):
+            # update service
             service = Services(
-                id=i,
-                name=f"test_service_{i}",
-                domain=".com.com",
-                frequency=3,
-                alerting_window=5,
-                allowed_response_time=1000,
+                name=name,
+                domain=domain,
+                frequency=frequency,
+                alerting_window=alerting_window,
+                allowed_response_time=allowed_response_time,
             )
-            session.add(service)
-            services.append(service)
 
-        print("hello")
+            old = session.query(Services).where(Services.name == name).first()
+            if old:
+                old.frequency = frequency
+                old.domain = domain
+                old.alerting_window = alerting_window
+                old.allowed_response_time = allowed_response_time
+                session.add(old)
+                service = old
+            else:
+                session.add(service)
 
-        session.commit()
+            # update admins
+            admin1 = Admins(email=email1)
+            admin2 = Admins(email=email2)
 
-        print("hello")
-        for service in services:
-            session.add(
+            session.merge(admin1)
+            session.merge(admin2)
+            session.commit()
+
+            # update ownership
+            admin1 = session.query(Admins).where(Admins.email == email1).first()
+            admin2 = session.query(Admins).where(Admins.email == email2).first()
+            session.merge(
                 Ownership(service_id=service.id, admin_id=admin1.id, first_contact=True)
             )
-            session.add(
+            session.merge(
                 Ownership(
                     service_id=service.id, admin_id=admin2.id, first_contact=False
                 )
             )
 
-        print("hello")
-        session.commit()
-        print("hello")
+            session.commit()
+        return None
 
-    clean_up_db(db)
-    migrate_db(db)
+    update_config("elo", "google.com", 3, 10, 100, "what@mai.com", "waljf@elo.com")
