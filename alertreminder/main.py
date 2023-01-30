@@ -47,6 +47,7 @@ def notify(expired_alerts: list[Alerts], endpoint: str) -> None:
 
 
 with Flow("Response deadline ticker") as flow:
+    logging.info(f"Running flow from process with pid {os.getpid()}")
     endpoint = os.getenv("ALERTMANAGER_ENDPOINT", "localhost:50052")
     expired_alerts = getExpiredAlerts()
     notify(expired_alerts, endpoint)
@@ -54,6 +55,9 @@ with Flow("Response deadline ticker") as flow:
 
 def kickoff_auto_heal(task, old_state, new_state):
     if new_state.is_failed():
+        logging.info(
+            f"Background task with pid {os.getpid()} has failed, killing parent and commencing autoheal."
+        )
         p = psutil.Process(os.getppid())
         p.terminate()  # or p.kill()
         sys.exit()
